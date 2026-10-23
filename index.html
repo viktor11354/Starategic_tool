@@ -149,6 +149,8 @@
           <span class="text-gray-300">•</span>
           <span>0 Sub-goals</span>
           <span class="text-gray-300">•</span>
+          <span>0 Milestones</span>
+          <span class="text-gray-300">•</span>
           <span>0/0 Actions</span>
         </div>
 
@@ -425,12 +427,12 @@
   </div>
 
   <!-- MODAL 2: Sub-Goal (Add / Edit) -->
-  <div id="subgoal-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+  <div id="subgoal-modal" onclick="if(event.target === this) closeSubGoalModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-apple-modal border border-apple-border transition-all transform scale-100">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 id="subgoal-modal-header" class="text-base font-semibold text-apple-dark">Add Sub-Goal</h3>
-          <p id="subgoal-modal-goal-name" class="text-xs text-apple-secondary">Intermediate milestone</p>
+          <p id="subgoal-modal-goal-name" class="text-xs text-apple-secondary">Define an intermediate track or milestone phase</p>
         </div>
         <button onclick="closeSubGoalModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -442,13 +444,13 @@
         <input type="hidden" id="subgoal-edit-id">
 
         <div>
-          <label class="block text-xs font-medium text-apple-dark mb-1.5">Sub-Goal / Milestone Title</label>
-          <input type="text" id="subgoal-title-input" required placeholder="e.g. Market Intelligence & Firm Outreach" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2.5 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Sub-Goal Title</label>
+          <input type="text" id="subgoal-title-input" required placeholder="e.g. Market Intelligence & Outreach" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2.5 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-apple-dark mb-1.5">Timeline / Cadence</label>
-          <input type="text" id="subgoal-timeline-input" placeholder="e.g. Phase 1 • 6 Weeks" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Timeline / Phase</label>
+          <input type="text" id="subgoal-timeline-input" placeholder="e.g. Phase 1 • 6 Weeks" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2.5 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
         </div>
 
         <div class="pt-2 flex items-center justify-end space-x-3">
@@ -459,57 +461,90 @@
     </div>
   </div>
 
-  <!-- MODAL 3: Tactical Action / Task (Add / Edit) with DEADLINE -->
-  <div id="task-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+  <!-- MODAL 3: Milestone (Add / Edit) with DEADLINE -->
+  <div id="milestone-modal" onclick="if(event.target === this) closeMilestoneModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-apple-modal border border-apple-border transition-all transform scale-100">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 id="task-modal-header" class="text-base font-semibold text-apple-dark">Add Tactical Action</h3>
-          <p id="task-modal-goal-name" class="text-xs text-apple-secondary">Specific action step</p>
+          <h3 id="milestone-modal-header" class="text-base font-semibold text-apple-dark">Add Milestone</h3>
+          <p id="milestone-modal-subgoal-name" class="text-xs text-apple-secondary">Key deliverable</p>
         </div>
-        <button onclick="closeTaskModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
+        <button onclick="closeMilestoneModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
-      <form id="task-form" onsubmit="handleSaveTask(event)" class="space-y-4">
-        <input type="hidden" id="task-goal-id">
-        <input type="hidden" id="task-subgoal-id">
-        <input type="hidden" id="task-edit-id">
+      <form id="milestone-form" onsubmit="handleSaveMilestone(event)" class="space-y-4">
+        <input type="hidden" id="milestone-goal-id">
+        <input type="hidden" id="milestone-subgoal-id">
+        <input type="hidden" id="milestone-edit-id">
 
         <div>
-          <label class="block text-xs font-medium text-apple-dark mb-1.5">Action Item Title</label>
-          <input type="text" id="task-title-input" required placeholder="e.g. Map out Brussels-based & London boutique firms" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2.5 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Milestone Title</label>
+          <input type="text" id="milestone-title-input" required placeholder="e.g. Map out Brussels-based & London boutique firms" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2.5 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-apple-dark mb-1.5">Priority</label>
-            <select id="task-priority-input" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+            <select id="milestone-priority-input" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
               <option value="High">High Impact</option>
               <option value="Medium" selected>Medium</option>
               <option value="Low">Maintenance</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-apple-dark mb-1.5">Est. Cadence</label>
-            <input type="text" id="task-cadence-input" placeholder="e.g. 2h deep work / Daily" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-apple-dark mb-1.5 flex items-center justify-between">
-            <span>Target Deadline</span>
-            <span class="text-[10px] text-apple-secondary font-normal">Optional date</span>
-          </label>
-          <div class="relative">
-            <input type="date" id="task-deadline-input" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+            <label class="block text-xs font-medium text-apple-dark mb-1.5">Target Deadline</label>
+            <input type="date" id="milestone-deadline-input" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
           </div>
         </div>
 
         <div class="pt-2 flex items-center justify-end space-x-3">
-          <button type="button" onclick="closeTaskModal()" class="px-4 py-2 rounded-2xl text-xs font-medium text-apple-secondary hover:text-apple-dark hover:bg-gray-100 transition">Cancel</button>
-          <button type="submit" id="task-submit-btn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-apple-blue hover:bg-apple-blueHover text-white shadow-sm transition">Commit Action</button>
+          <button type="button" onclick="closeMilestoneModal()" class="px-4 py-2 rounded-2xl text-xs font-medium text-apple-secondary hover:text-apple-dark hover:bg-gray-100 transition">Cancel</button>
+          <button type="submit" id="milestone-submit-btn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-apple-blue hover:bg-apple-blueHover text-white shadow-sm transition">Save Milestone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3B: Tactical Action (Add / Edit under a Milestone) -->
+  <div id="action-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-apple-modal border border-apple-border transition-all transform scale-100">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 id="action-modal-header" class="text-base font-semibold text-apple-dark">Add Tactical Action</h3>
+          <p id="action-modal-milestone-name" class="text-xs text-apple-secondary">Specific daily step</p>
+        </div>
+        <button onclick="closeActionModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="action-form" onsubmit="handleSaveAction(event)" class="space-y-4">
+        <input type="hidden" id="action-goal-id">
+        <input type="hidden" id="action-subgoal-id">
+        <input type="hidden" id="action-milestone-id">
+        <input type="hidden" id="action-edit-id">
+
+        <div>
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Action Title</label>
+          <input type="text" id="action-title-input" required placeholder="e.g. Scrape directory of boutique energy advisories" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2.5 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-apple-dark mb-1.5">Cadence / Time Estimate</label>
+            <input type="text" id="action-cadence-input" placeholder="e.g. 45m deep work" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-dark mb-1.5">Scheduled Date</label>
+            <input type="date" id="action-date-input" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-3">
+          <button type="button" onclick="closeActionModal()" class="px-4 py-2 rounded-2xl text-xs font-medium text-apple-secondary hover:text-apple-dark hover:bg-gray-100 transition">Cancel</button>
+          <button type="submit" id="action-submit-btn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-apple-blue hover:bg-apple-blueHover text-white shadow-sm transition">Save Action</button>
         </div>
       </form>
     </div>
@@ -537,7 +572,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 id="schedule-modal-header" class="text-base font-semibold text-apple-dark">Schedule Time Block</h3>
-          <p id="schedule-modal-subtitle" class="text-xs text-apple-secondary">Assign tactical action to timeline</p>
+          <p id="schedule-modal-subtitle" class="text-xs text-apple-secondary">Assign action to timeline</p>
         </div>
         <button onclick="closeScheduleModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -547,6 +582,7 @@
       <form id="schedule-form" onsubmit="handleConfirmSchedule(event)" class="space-y-4">
         <input type="hidden" id="schedule-task-goal-id">
         <input type="hidden" id="schedule-task-subgoal-id">
+        <input type="hidden" id="schedule-task-milestone-id">
         <input type="hidden" id="schedule-task-id">
 
         <div>
@@ -597,7 +633,7 @@
   </div>
 
   <script>
-    // Initial Seed Data: 3-tier hierarchy (Strategic Goal -> Sub-goals -> Tasks with Deadlines)
+    // Initial Seed Data: 4-tier hierarchy (Strategic Goal -> Sub-goals -> Milestones -> Actions)
     const INITIAL_GOALS = [
       {
         id: 'goal-1',
@@ -611,9 +647,29 @@
             title: 'Market Intelligence & Firm Outreach',
             timeline: 'Phase 1 • 6 Weeks',
             collapsed: false,
-            tasks: [
-              { id: 't-1-1-1', title: 'Map out Brussels-based & London boutique firms', priority: 'High', cadence: '2h deep work', deadline: '2026-11-05', completed: true, scheduledDate: '2026-11-05', scheduledSlot: '09:00', durationMinutes: 120 },
-              { id: 't-1-1-2', title: 'Conduct 3 informational interviews with grid transformation analysts', priority: 'Medium', cadence: 'Bi-weekly', deadline: '2026-11-20', completed: false, scheduledDate: '2026-11-20', scheduledSlot: '14:00', durationMinutes: 60 }
+            milestones: [
+              {
+                id: 'm-1-1-1',
+                title: 'Map out Brussels-based & London boutique firms',
+                priority: 'High',
+                deadline: '2026-11-05',
+                collapsed: false,
+                actions: [
+                  { id: 'act-1-1-1-1', title: 'Scrape directory of boutique energy advisories in Benelux & UK', cadence: '1h focus', scheduledDate: '2026-11-05', scheduledSlot: '09:00', durationMinutes: 120, completed: true },
+                  { id: 'act-1-1-1-2', title: 'Synthesize target list into Tier 1 & Tier 2 priority tracker', cadence: '45m deep work', scheduledDate: '2026-11-05', scheduledSlot: '11:00', durationMinutes: 60, completed: true }
+                ]
+              },
+              {
+                id: 'm-1-1-2',
+                title: 'Conduct 3 informational interviews with grid transformation analysts',
+                priority: 'Medium',
+                deadline: '2026-11-20',
+                collapsed: false,
+                actions: [
+                  { id: 'act-1-1-2-1', title: 'Draft personalized cold outreach messages on LinkedIn', cadence: '30m sprint', scheduledDate: '2026-11-20', scheduledSlot: '14:00', durationMinutes: 60, completed: false },
+                  { id: 'act-1-1-2-2', title: 'Prepare 5 structured questions on transmission operator bottlenecks', cadence: '30m', scheduledDate: null, scheduledSlot: null, durationMinutes: 60, completed: false }
+                ]
+              }
             ]
           },
           {
@@ -621,9 +677,28 @@
             title: 'Case Preparation & Portfolio Hardening',
             timeline: 'Phase 2 • Ongoing',
             collapsed: false,
-            tasks: [
-              { id: 't-1-2-1', title: 'Update quantitative modeling portfolio with grid storage case', priority: 'High', cadence: 'Weekly sprint', deadline: '2026-12-01', completed: false, scheduledDate: '2026-11-05', scheduledSlot: '11:00', durationMinutes: 60 },
-              { id: 't-1-2-2', title: 'Master 10 timed market-sizing drills on hydrogen deployment', priority: 'Medium', cadence: '30m daily', deadline: '2026-12-15', completed: false, scheduledDate: '2026-11-05', scheduledSlot: '16:00', durationMinutes: 60 }
+            milestones: [
+              {
+                id: 'm-1-2-1',
+                title: 'Update quantitative modeling portfolio with grid storage case',
+                priority: 'High',
+                deadline: '2026-12-01',
+                collapsed: false,
+                actions: [
+                  { id: 'act-1-2-1-1', title: 'Build LCOE comparison tab for lithium-ion vs. flow batteries', cadence: '2h deep work', scheduledDate: '2026-11-05', scheduledSlot: '16:00', durationMinutes: 60, completed: false },
+                  { id: 'act-1-2-1-2', title: 'Document methodology executive summary slide deck', cadence: '1h', scheduledDate: null, scheduledSlot: null, durationMinutes: 60, completed: false }
+                ]
+              },
+              {
+                id: 'm-1-2-2',
+                title: 'Master 10 timed market-sizing drills on hydrogen deployment',
+                priority: 'Medium',
+                deadline: '2026-12-15',
+                collapsed: false,
+                actions: [
+                  { id: 'act-1-2-2-1', title: 'Complete drills #1-#5 on EU industrial hydrogen quotas', cadence: '45m daily', scheduledDate: null, scheduledSlot: null, durationMinutes: 45, completed: false }
+                ]
+              }
             ]
           }
         ]
@@ -640,9 +715,18 @@
             title: 'Core Engine & API Infrastructure',
             timeline: 'Sprint 1',
             collapsed: false,
-            tasks: [
-              { id: 't-2-1-1', title: 'Synthesize Copernicus climate data ingestion API pipeline', priority: 'High', cadence: '4h sprint', deadline: '2026-10-30', completed: true },
-              { id: 't-2-1-2', title: 'Set up real-time vector cache on serverless cluster', priority: 'High', cadence: 'Done', deadline: '2026-11-08', completed: true }
+            milestones: [
+              {
+                id: 'm-2-1-1',
+                title: 'Synthesize Copernicus climate data ingestion API pipeline',
+                priority: 'High',
+                deadline: '2026-10-30',
+                collapsed: false,
+                actions: [
+                  { id: 'act-2-1-1-1', title: 'Implement automated netCDF raster parsing service', cadence: '3h build', completed: true },
+                  { id: 'act-2-1-1-2', title: 'Set up real-time vector cache on serverless cluster', cadence: '1h setup', completed: true }
+                ]
+              }
             ]
           },
           {
@@ -650,9 +734,27 @@
             title: 'Design & Customer Validation',
             timeline: 'Sprint 2',
             collapsed: false,
-            tasks: [
-              { id: 't-2-2-1', title: 'Design minimalist decision-tree reporting dashboard in Figma', priority: 'High', cadence: 'Done', deadline: '2026-11-14', completed: true },
-              { id: 't-2-2-2', title: 'Interview 5 ESG supply chain managers on pain points', priority: 'Medium', cadence: 'In progress', deadline: '2026-11-25', completed: false }
+            milestones: [
+              {
+                id: 'm-2-2-1',
+                title: 'Design minimalist decision-tree reporting dashboard in Figma',
+                priority: 'High',
+                deadline: '2026-11-14',
+                collapsed: false,
+                actions: [
+                  { id: 'act-2-2-1-1', title: 'Create interactive component library for chart widgets', cadence: '2h design', completed: true }
+                ]
+              },
+              {
+                id: 'm-2-2-2',
+                title: 'Interview 5 ESG supply chain managers on pain points',
+                priority: 'Medium',
+                deadline: '2026-11-25',
+                collapsed: false,
+                actions: [
+                  { id: 'act-2-2-2-1', title: 'Schedule interviews with automotive ESG directors', cadence: 'Outreach', completed: false }
+                ]
+              }
             ]
           }
         ]
@@ -669,9 +771,27 @@
             title: 'Grammar & Professional Vocabulary Foundation',
             timeline: 'Month 1-3',
             collapsed: false,
-            tasks: [
-              { id: 't-3-1-1', title: 'Complete 30-day grammar sprint focusing on subjonctif & idioms', priority: 'High', cadence: '20m daily', deadline: '2026-11-10', completed: true },
-              { id: 't-3-1-2', title: 'Schedule bi-weekly conversation sessions on energy policy', priority: 'Medium', cadence: 'Weekly', deadline: '2026-12-05', completed: false }
+            milestones: [
+              {
+                id: 'm-3-1-1',
+                title: 'Complete 30-day grammar sprint focusing on subjonctif & idioms',
+                priority: 'High',
+                deadline: '2026-11-10',
+                collapsed: false,
+                actions: [
+                  { id: 'act-3-1-1-1', title: 'Daily grammar flashcard deck on Le Figaro business articles', cadence: '20m daily', completed: true }
+                ]
+              },
+              {
+                id: 'm-3-1-2',
+                title: 'Schedule bi-weekly conversation sessions on energy policy',
+                priority: 'Medium',
+                deadline: '2026-12-05',
+                collapsed: false,
+                actions: [
+                  { id: 'act-3-1-2-1', title: 'Book 4 speaking sessions on italki with tutor', cadence: 'Weekly', completed: false }
+                ]
+              }
             ]
           }
         ]
@@ -704,7 +824,7 @@
         .replace(/'/g, '&#39;');
     }
 
-    // Helper: Format date string YYYY-MM-DD -> "Nov 5, 2026" or "Nov 5"
+    // Helper: Format date string YYYY-MM-DD -> "Nov 5, 2026"
     function formatDeadline(dateStr) {
       if (!dateStr) return '';
       try {
@@ -722,19 +842,45 @@
       }
     }
 
-    // Helper: Extract all tasks in flat list with parent info
-    function getAllTasksWithContext() {
+    // Helper: Extract all actions in flat list with full parent context
+    function getAllActionsWithContext() {
       const list = [];
       goals.forEach(goal => {
         (goal.subGoals || []).forEach(sg => {
-          (sg.tasks || []).forEach(task => {
+          (sg.milestones || []).forEach(m => {
+            (m.actions || []).forEach(act => {
+              list.push({
+                goalId: goal.id,
+                goalTitle: goal.title,
+                pillar: goal.pillar,
+                subGoalId: sg.id,
+                subGoalTitle: sg.title,
+                milestoneId: m.id,
+                milestoneTitle: m.title,
+                milestoneDeadline: m.deadline,
+                milestonePriority: m.priority,
+                ...act
+              });
+            });
+          });
+        });
+      });
+      return list;
+    }
+
+    // Helper: Extract all milestones in flat list
+    function getAllMilestonesWithContext() {
+      const list = [];
+      goals.forEach(goal => {
+        (goal.subGoals || []).forEach(sg => {
+          (sg.milestones || []).forEach(m => {
             list.push({
               goalId: goal.id,
               goalTitle: goal.title,
               pillar: goal.pillar,
               subGoalId: sg.id,
               subGoalTitle: sg.title,
-              ...task
+              ...m
             });
           });
         });
@@ -753,12 +899,10 @@
       const navBtnCal = document.getElementById('nav-btn-calendar');
       const navBtnPlan = document.getElementById('nav-btn-planner');
 
-      // Hide all views first
       treeSection.classList.add('hidden');
       calSection.classList.add('hidden');
       plannerSection.classList.add('hidden');
 
-      // Reset button styles to inactive
       const inactiveBtnClass = 'flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-apple-secondary hover:text-apple-dark transition';
       const activeBtnClass = 'flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white shadow-xs text-apple-dark font-semibold transition';
 
@@ -781,7 +925,6 @@
       }
     }
 
-    // Direct jump from Calendar Day Inspector into Planner
     function goToPlannerForDay(dateStr) {
       if (dateStr) {
         plannerActiveDateStr = dateStr;
@@ -789,7 +932,6 @@
       switchView('planner');
     }
 
-    // Planner Navigation Functions
     function plannerPrevDay() {
       try {
         const parts = plannerActiveDateStr.split('-');
@@ -835,7 +977,6 @@
       renderPlanner();
     }
 
-    // Calendar Navigation Functions
     function calPrevMonth() {
       calCurrentMonth--;
       if (calCurrentMonth < 0) {
@@ -869,9 +1010,8 @@
       renderCalendar();
     }
 
-    // Helper: Determine deadline urgency badge styling
-    function getDeadlineToBadge(deadlineStr, completed) {
-      if (!deadlineStr || completed) {
+    function getDeadlineToBadge(deadlineStr) {
+      if (!deadlineStr) {
         return 'bg-gray-100/80 text-apple-secondary border-gray-200/80';
       }
       try {
@@ -882,10 +1022,8 @@
           const target = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
           const diffDays = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
           if (diffDays < 0) {
-            // Overdue
             return 'bg-rose-50 text-rose-600 border-rose-200 font-medium';
           } else if (diffDays <= 3) {
-            // Due within 3 days
             return 'bg-amber-50 text-amber-700 border-amber-200 font-medium';
           }
         }
@@ -895,31 +1033,45 @@
 
     function init() {
       try {
-        const stored = localStorage.getItem('strata_goals_v3');
+        const stored = localStorage.getItem('strata_goals_v4');
         if (stored) {
           goals = JSON.parse(stored);
-          // Migrate any previous version data missing subGoals
-          let needsMigration = false;
-          goals.forEach(g => {
-            if (!g.subGoals) {
-              g.subGoals = [];
-              if (g.tasks && Array.isArray(g.tasks) && g.tasks.length > 0) {
-                g.subGoals.push({
-                  id: 'sg-' + Date.now(),
-                  title: 'Core Milestone',
-                  timeline: 'Current Sprint',
-                  collapsed: false,
-                  tasks: g.tasks
-                });
-                delete g.tasks;
-              }
-              needsMigration = true;
-            }
-          });
-          if (needsMigration) saveState();
         } else {
-          goals = JSON.parse(JSON.stringify(INITIAL_GOALS));
-          saveState();
+          // Check for legacy v3 migration (where tasks need to become milestones with actions)
+          const legacyV3 = localStorage.getItem('strata_goals_v3');
+          if (legacyV3) {
+            const parsed = JSON.parse(legacyV3);
+            parsed.forEach(g => {
+              (g.subGoals || []).forEach(sg => {
+                if (sg.tasks && !sg.milestones) {
+                  sg.milestones = sg.tasks.map(t => ({
+                    id: t.id.replace('t-', 'm-'),
+                    title: t.title,
+                    priority: t.priority || 'Medium',
+                    deadline: t.deadline || '',
+                    collapsed: false,
+                    actions: [
+                      {
+                        id: 'act-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+                        title: 'Execute: ' + t.title,
+                        cadence: t.cadence || '1h focus',
+                        completed: !!t.completed,
+                        scheduledDate: t.scheduledDate || null,
+                        scheduledSlot: t.scheduledSlot || null,
+                        durationMinutes: t.durationMinutes || 60
+                      }
+                    ]
+                  }));
+                  delete sg.tasks;
+                }
+              });
+            });
+            goals = parsed;
+            saveState();
+          } else {
+            goals = JSON.parse(JSON.stringify(INITIAL_GOALS));
+            saveState();
+          }
         }
       } catch (e) {
         goals = JSON.parse(JSON.stringify(INITIAL_GOALS));
@@ -929,9 +1081,9 @@
 
     function saveState() {
       try {
-        localStorage.setItem('strata_goals_v3', JSON.stringify(goals));
+        localStorage.setItem('strata_goals_v4', JSON.stringify(goals));
       } catch (e) {
-        console.error('Failed to save to localStorage:', e);
+        console.error('Failed to save state:', e);
       }
     }
 
@@ -939,7 +1091,7 @@
       goals = JSON.parse(JSON.stringify(INITIAL_GOALS));
       saveState();
       render();
-      showToast('Sample tree structure restored');
+      showToast('Sample structure restored');
     }
 
     function showToast(msg) {
@@ -1003,7 +1155,7 @@
         goals.push({
           id: 'goal-' + Date.now(),
           title,
-          pillar: pillar || 'Core Strategic Pillar',
+          pillar: pillar || 'Strategic Pillar',
           horizon: horizon || 'Upcoming',
           collapsed: false,
           subGoals: []
@@ -1076,10 +1228,10 @@
             title,
             timeline,
             collapsed: false,
-            tasks: []
+            milestones: []
           });
           parentGoal.collapsed = false;
-          showToast('Sub-goal milestone added');
+          showToast('Sub-goal added');
         }
         saveState();
         render();
@@ -1087,110 +1239,199 @@
       }
     }
 
-    // Modal Handlers: Tactical Action / Task with Deadline
-    function openTaskModal(goalId, subGoalId, taskId = null) {
+    // Modal Handlers: Milestone (Level 3)
+    function openMilestoneModal(goalId, subGoalId, milestoneId = null) {
       const goal = goals.find(g => g.id === goalId);
       if (!goal) return;
       if (!goal.subGoals) goal.subGoals = [];
       const sg = goal.subGoals.find(s => s.id === subGoalId);
       if (!sg) return;
 
-      const form = document.getElementById('task-form');
-      if (form) form.reset();
+      document.getElementById('milestone-form').reset();
+      document.getElementById('milestone-goal-id').value = goalId;
+      document.getElementById('milestone-subgoal-id').value = subGoalId;
+      const editIdInput = document.getElementById('milestone-edit-id');
+      const modalHeader = document.getElementById('milestone-modal-header');
+      const submitBtn = document.getElementById('milestone-submit-btn');
 
-      document.getElementById('task-goal-id').value = goalId;
-      document.getElementById('task-subgoal-id').value = subGoalId;
-      const editIdInput = document.getElementById('task-edit-id');
-      const modalHeader = document.getElementById('task-modal-header');
-      const submitBtn = document.getElementById('task-submit-btn');
-
-      if (taskId) {
-        const task = (sg.tasks || []).find(t => t.id === taskId);
-        if (!task) return;
-        editIdInput.value = task.id;
-        document.getElementById('task-title-input').value = task.title || '';
-        document.getElementById('task-priority-input').value = task.priority || 'Medium';
-        document.getElementById('task-cadence-input').value = task.cadence || '';
-        document.getElementById('task-deadline-input').value = task.deadline || '';
-        modalHeader.innerText = 'Edit Tactical Action';
-        submitBtn.innerText = 'Update Action';
+      if (milestoneId) {
+        const m = (sg.milestones || []).find(item => item.id === milestoneId);
+        if (!m) return;
+        editIdInput.value = m.id;
+        document.getElementById('milestone-title-input').value = m.title || '';
+        document.getElementById('milestone-priority-input').value = m.priority || 'Medium';
+        document.getElementById('milestone-deadline-input').value = m.deadline || '';
+        modalHeader.innerText = 'Edit Milestone';
+        submitBtn.innerText = 'Update Milestone';
       } else {
         editIdInput.value = '';
-        document.getElementById('task-title-input').value = '';
-        document.getElementById('task-priority-input').value = 'Medium';
-        document.getElementById('task-cadence-input').value = '';
-        document.getElementById('task-deadline-input').value = '';
-        modalHeader.innerText = 'Add Tactical Action';
-        submitBtn.innerText = 'Commit Action';
+        document.getElementById('milestone-title-input').value = '';
+        document.getElementById('milestone-priority-input').value = 'Medium';
+        document.getElementById('milestone-deadline-input').value = '';
+        modalHeader.innerText = 'Add Milestone';
+        submitBtn.innerText = 'Save Milestone';
       }
 
-      document.getElementById('task-modal-goal-name').innerText = `Sub-Goal: ${sg.title}`;
-      document.getElementById('task-modal').classList.remove('hidden');
-      setTimeout(() => document.getElementById('task-title-input').focus(), 50);
+      document.getElementById('milestone-modal-subgoal-name').innerText = `Sub-Goal: ${sg.title}`;
+      document.getElementById('milestone-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('milestone-title-input').focus(), 50);
     }
 
-    function closeTaskModal() {
-      document.getElementById('task-modal').classList.add('hidden');
+    function closeMilestoneModal() {
+      document.getElementById('milestone-modal').classList.add('hidden');
     }
 
-    function handleSaveTask(e) {
+    function handleSaveMilestone(e) {
       e.preventDefault();
-      const goalId = document.getElementById('task-goal-id').value;
-      const subGoalId = document.getElementById('task-subgoal-id').value;
-      const editTaskId = document.getElementById('task-edit-id').value;
-      const title = document.getElementById('task-title-input').value.trim();
-      const priority = document.getElementById('task-priority-input').value;
-      const cadence = document.getElementById('task-cadence-input').value.trim() || 'Daily action';
-      const deadline = document.getElementById('task-deadline-input').value || '';
+      const goalId = document.getElementById('milestone-goal-id').value;
+      const subGoalId = document.getElementById('milestone-subgoal-id').value;
+      const editMilestoneId = document.getElementById('milestone-edit-id').value;
+      const title = document.getElementById('milestone-title-input').value.trim();
+      const priority = document.getElementById('milestone-priority-input').value;
+      const deadline = document.getElementById('milestone-deadline-input').value || '';
 
       if (!title) return;
 
       const goal = goals.find(g => g.id === goalId);
-      if (goal) {
-        if (!goal.subGoals) goal.subGoals = [];
+      if (goal && goal.subGoals) {
         const sg = goal.subGoals.find(s => s.id === subGoalId);
         if (sg) {
-          if (!sg.tasks) sg.tasks = [];
+          if (!sg.milestones) sg.milestones = [];
 
-          if (editTaskId) {
-            const task = sg.tasks.find(t => t.id === editTaskId);
-            if (task) {
-              task.title = title;
-              task.priority = priority;
-              task.cadence = cadence;
-              task.deadline = deadline;
-              showToast('Tactical action updated');
+          if (editMilestoneId) {
+            const m = sg.milestones.find(item => item.id === editMilestoneId);
+            if (m) {
+              m.title = title;
+              m.priority = priority;
+              m.deadline = deadline;
+              showToast('Milestone updated');
             }
           } else {
-            sg.tasks.push({
-              id: 'task-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+            sg.milestones.push({
+              id: 'm-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
               title,
               priority,
-              cadence,
               deadline,
-              completed: false
+              collapsed: false,
+              actions: []
             });
             sg.collapsed = false;
-            showToast('Daily action committed');
+            showToast('Milestone added');
           }
           saveState();
           render();
-          closeTaskModal();
+          closeMilestoneModal();
         }
       }
     }
 
-    // Toggle Task Complete
-    function toggleTask(goalId, subGoalId, taskId) {
+    // Modal Handlers: Tactical Action (Level 4, under a Milestone)
+    function openActionModal(goalId, subGoalId, milestoneId, actionId = null) {
+      const goal = goals.find(g => g.id === goalId);
+      if (!goal || !goal.subGoals) return;
+      const sg = goal.subGoals.find(s => s.id === subGoalId);
+      if (!sg || !sg.milestones) return;
+      const m = sg.milestones.find(item => item.id === milestoneId);
+      if (!m) return;
+
+      document.getElementById('action-form').reset();
+      document.getElementById('action-goal-id').value = goalId;
+      document.getElementById('action-subgoal-id').value = subGoalId;
+      document.getElementById('action-milestone-id').value = milestoneId;
+      const editIdInput = document.getElementById('action-edit-id');
+      const modalHeader = document.getElementById('action-modal-header');
+      const submitBtn = document.getElementById('action-submit-btn');
+
+      if (actionId) {
+        const act = (m.actions || []).find(a => a.id === actionId);
+        if (!act) return;
+        editIdInput.value = act.id;
+        document.getElementById('action-title-input').value = act.title || '';
+        document.getElementById('action-cadence-input').value = act.cadence || '';
+        document.getElementById('action-date-input').value = act.scheduledDate || m.deadline || '';
+        modalHeader.innerText = 'Edit Tactical Action';
+        submitBtn.innerText = 'Update Action';
+      } else {
+        editIdInput.value = '';
+        document.getElementById('action-title-input').value = '';
+        document.getElementById('action-cadence-input').value = '';
+        document.getElementById('action-date-input').value = m.deadline || '';
+        modalHeader.innerText = 'Add Tactical Action';
+        submitBtn.innerText = 'Commit Action';
+      }
+
+      document.getElementById('action-modal-milestone-name').innerText = `Milestone: ${m.title}`;
+      document.getElementById('action-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('action-title-input').focus(), 50);
+    }
+
+    function closeActionModal() {
+      document.getElementById('action-modal').classList.add('hidden');
+    }
+
+    function handleSaveAction(e) {
+      e.preventDefault();
+      const goalId = document.getElementById('action-goal-id').value;
+      const subGoalId = document.getElementById('action-subgoal-id').value;
+      const milestoneId = document.getElementById('action-milestone-id').value;
+      const editActionId = document.getElementById('action-edit-id').value;
+      const title = document.getElementById('action-title-input').value.trim();
+      const cadence = document.getElementById('action-cadence-input').value.trim() || 'Daily action';
+      const scheduledDate = document.getElementById('action-date-input').value || null;
+
+      if (!title) return;
+
       const goal = goals.find(g => g.id === goalId);
       if (goal && goal.subGoals) {
         const sg = goal.subGoals.find(s => s.id === subGoalId);
-        if (sg && sg.tasks) {
-          const task = sg.tasks.find(t => t.id === taskId);
-          if (task) {
-            task.completed = !task.completed;
+        if (sg && sg.milestones) {
+          const m = sg.milestones.find(item => item.id === milestoneId);
+          if (m) {
+            if (!m.actions) m.actions = [];
+
+            if (editActionId) {
+              const act = m.actions.find(a => a.id === editActionId);
+              if (act) {
+                act.title = title;
+                act.cadence = cadence;
+                if (scheduledDate) act.scheduledDate = scheduledDate;
+                showToast('Action updated');
+              }
+            } else {
+              m.actions.push({
+                id: 'act-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+                title,
+                cadence,
+                scheduledDate: scheduledDate || m.deadline || null,
+                scheduledSlot: null,
+                durationMinutes: 60,
+                completed: false
+              });
+              m.collapsed = false;
+              showToast('Action committed under milestone');
+            }
             saveState();
             render();
+            closeActionModal();
+          }
+        }
+      }
+    }
+
+    // Toggle Action Complete
+    function toggleAction(goalId, subGoalId, milestoneId, actionId) {
+      const goal = goals.find(g => g.id === goalId);
+      if (goal && goal.subGoals) {
+        const sg = goal.subGoals.find(s => s.id === subGoalId);
+        if (sg && sg.milestones) {
+          const m = sg.milestones.find(item => item.id === milestoneId);
+          if (m && m.actions) {
+            const act = m.actions.find(a => a.id === actionId);
+            if (act) {
+              act.completed = !act.completed;
+              saveState();
+              render();
+            }
           }
         }
       }
@@ -1218,6 +1459,21 @@
       }
     }
 
+    function toggleMilestoneCollapse(goalId, subGoalId, milestoneId) {
+      const g = goals.find(item => item.id === goalId);
+      if (g && g.subGoals) {
+        const sg = g.subGoals.find(s => s.id === subGoalId);
+        if (sg && sg.milestones) {
+          const m = sg.milestones.find(item => item.id === milestoneId);
+          if (m) {
+            m.collapsed = !m.collapsed;
+            saveState();
+            render();
+          }
+        }
+      }
+    }
+
     // Delete Confirmation Flow
     let pendingDeleteAction = null;
 
@@ -1225,7 +1481,7 @@
       const g = goals.find(item => item.id === goalId);
       if (!g) return;
       document.getElementById('delete-modal-title').innerText = 'Delete Strategic Goal?';
-      document.getElementById('delete-modal-desc').innerText = `"${g.title}" and all its sub-goals and actions will be permanently removed.`;
+      document.getElementById('delete-modal-desc').innerText = `"${g.title}" and all its sub-goals, milestones, and actions will be removed.`;
       pendingDeleteAction = () => {
         goals = goals.filter(item => item.id !== goalId);
         showToast('Strategic goal deleted');
@@ -1240,7 +1496,7 @@
       if (!sg) return;
 
       document.getElementById('delete-modal-title').innerText = 'Delete Sub-Goal?';
-      document.getElementById('delete-modal-desc').innerText = `"${sg.title}" and its actions will be removed.`;
+      document.getElementById('delete-modal-desc').innerText = `"${sg.title}" and its milestones will be removed.`;
       pendingDeleteAction = () => {
         g.subGoals = g.subGoals.filter(s => s.id !== subGoalId);
         showToast('Sub-goal deleted');
@@ -1248,18 +1504,37 @@
       document.getElementById('delete-modal').classList.remove('hidden');
     }
 
-    function promptDeleteTask(goalId, subGoalId, taskId) {
+    function promptDeleteMilestone(goalId, subGoalId, milestoneId) {
       const g = goals.find(item => item.id === goalId);
       if (!g || !g.subGoals) return;
       const sg = g.subGoals.find(s => s.id === subGoalId);
-      if (!sg || !sg.tasks) return;
-      const task = sg.tasks.find(t => t.id === taskId);
-      if (!task) return;
+      if (!sg || !sg.milestones) return;
+      const m = sg.milestones.find(item => item.id === milestoneId);
+      if (!m) return;
 
-      document.getElementById('delete-modal-title').innerText = 'Delete Action?';
-      document.getElementById('delete-modal-desc').innerText = `"${task.title}" will be removed.`;
+      document.getElementById('delete-modal-title').innerText = 'Delete Milestone?';
+      document.getElementById('delete-modal-desc').innerText = `"${m.title}" and its actions will be removed.`;
       pendingDeleteAction = () => {
-        sg.tasks = sg.tasks.filter(t => t.id !== taskId);
+        sg.milestones = sg.milestones.filter(item => item.id !== milestoneId);
+        showToast('Milestone removed');
+      };
+      document.getElementById('delete-modal').classList.remove('hidden');
+    }
+
+    function promptDeleteAction(goalId, subGoalId, milestoneId, actionId) {
+      const g = goals.find(item => item.id === goalId);
+      if (!g || !g.subGoals) return;
+      const sg = g.subGoals.find(s => s.id === subGoalId);
+      if (!sg || !sg.milestones) return;
+      const m = sg.milestones.find(item => item.id === milestoneId);
+      if (!m || !m.actions) return;
+      const act = m.actions.find(a => a.id === actionId);
+      if (!act) return;
+
+      document.getElementById('delete-modal-title').innerText = 'Delete Tactical Action?';
+      document.getElementById('delete-modal-desc').innerText = `"${act.title}" will be removed.`;
+      pendingDeleteAction = () => {
+        m.actions = m.actions.filter(a => a.id !== actionId);
         showToast('Action removed');
       };
       document.getElementById('delete-modal').classList.remove('hidden');
@@ -1280,9 +1555,8 @@
     });
 
     // ==========================================
-    // DAY PLANNER SCHEDULING LOGIC & MODAL
+    // DAY PLANNER SCHEDULING LOGIC
     // ==========================================
-
     function populateSlotSelectOptions(selectedSlot = '09:00') {
       const select = document.getElementById('schedule-slot-select');
       if (!select) return;
@@ -1291,34 +1565,37 @@
       `).join('');
     }
 
-    function openScheduleModal(goalId, subGoalId, taskId, presetSlot = null) {
+    function openScheduleModal(goalId, subGoalId, milestoneId, actionId, presetSlot = null) {
       const goal = goals.find(g => g.id === goalId);
       if (!goal || !goal.subGoals) return;
       const sg = goal.subGoals.find(s => s.id === subGoalId);
-      if (!sg || !sg.tasks) return;
-      const task = sg.tasks.find(t => t.id === taskId);
-      if (!task) return;
+      if (!sg || !sg.milestones) return;
+      const m = sg.milestones.find(item => item.id === milestoneId);
+      if (!m || !m.actions) return;
+      const act = m.actions.find(a => a.id === actionId);
+      if (!act) return;
 
       document.getElementById('schedule-task-goal-id').value = goalId;
       document.getElementById('schedule-task-subgoal-id').value = subGoalId;
-      document.getElementById('schedule-task-id').value = taskId;
+      document.getElementById('schedule-task-milestone-id').value = milestoneId;
+      document.getElementById('schedule-task-id').value = actionId;
 
-      document.getElementById('schedule-task-title-display').innerText = task.title;
+      document.getElementById('schedule-task-title-display').innerText = act.title;
 
       const dateInput = document.getElementById('schedule-date-input');
-      dateInput.value = task.scheduledDate || task.deadline || plannerActiveDateStr;
+      dateInput.value = act.scheduledDate || m.deadline || plannerActiveDateStr;
 
-      const slotToUse = presetSlot || task.scheduledSlot || '09:00';
+      const slotToUse = presetSlot || act.scheduledSlot || '09:00';
       populateSlotSelectOptions(slotToUse);
 
       const durationSelect = document.getElementById('schedule-duration-select');
       if (durationSelect) {
-        durationSelect.value = String(task.durationMinutes || 60);
+        durationSelect.value = String(act.durationMinutes || 60);
       }
 
       const unscheduleBtn = document.getElementById('schedule-unschedule-btn');
       if (unscheduleBtn) {
-        if (task.scheduledSlot) {
+        if (act.scheduledSlot) {
           unscheduleBtn.classList.remove('hidden');
         } else {
           unscheduleBtn.classList.add('hidden');
@@ -1336,7 +1613,8 @@
       e.preventDefault();
       const goalId = document.getElementById('schedule-task-goal-id').value;
       const subGoalId = document.getElementById('schedule-task-subgoal-id').value;
-      const taskId = document.getElementById('schedule-task-id').value;
+      const milestoneId = document.getElementById('schedule-task-milestone-id').value;
+      const actionId = document.getElementById('schedule-task-id').value;
       const slot = document.getElementById('schedule-slot-select').value;
       const duration = parseInt(document.getElementById('schedule-duration-select').value, 10) || 60;
       const date = document.getElementById('schedule-date-input').value;
@@ -1344,16 +1622,19 @@
       const goal = goals.find(g => g.id === goalId);
       if (goal && goal.subGoals) {
         const sg = goal.subGoals.find(s => s.id === subGoalId);
-        if (sg && sg.tasks) {
-          const task = sg.tasks.find(t => t.id === taskId);
-          if (task) {
-            task.scheduledSlot = slot;
-            task.scheduledDate = date;
-            task.durationMinutes = duration;
-            showToast(`Scheduled for ${slot} on ${formatDeadline(date)}`);
-            saveState();
-            render();
-            closeScheduleModal();
+        if (sg && sg.milestones) {
+          const m = sg.milestones.find(item => item.id === milestoneId);
+          if (m && m.actions) {
+            const act = m.actions.find(a => a.id === actionId);
+            if (act) {
+              act.scheduledSlot = slot;
+              act.scheduledDate = date;
+              act.durationMinutes = duration;
+              showToast(`Scheduled for ${slot} on ${formatDeadline(date)}`);
+              saveState();
+              render();
+              closeScheduleModal();
+            }
           }
         }
       }
@@ -1362,39 +1643,46 @@
     function handleUnscheduleCurrent() {
       const goalId = document.getElementById('schedule-task-goal-id').value;
       const subGoalId = document.getElementById('schedule-task-subgoal-id').value;
-      const taskId = document.getElementById('schedule-task-id').value;
+      const milestoneId = document.getElementById('schedule-task-milestone-id').value;
+      const actionId = document.getElementById('schedule-task-id').value;
 
       const goal = goals.find(g => g.id === goalId);
       if (goal && goal.subGoals) {
         const sg = goal.subGoals.find(s => s.id === subGoalId);
-        if (sg && sg.tasks) {
-          const task = sg.tasks.find(t => t.id === taskId);
-          if (task) {
-            delete task.scheduledSlot;
-            delete task.scheduledDate;
-            delete task.durationMinutes;
-            showToast('Removed from schedule');
-            saveState();
-            render();
-            closeScheduleModal();
+        if (sg && sg.milestones) {
+          const m = sg.milestones.find(item => item.id === milestoneId);
+          if (m && m.actions) {
+            const act = m.actions.find(a => a.id === actionId);
+            if (act) {
+              delete act.scheduledSlot;
+              delete act.scheduledDate;
+              delete act.durationMinutes;
+              showToast('Removed from schedule');
+              saveState();
+              render();
+              closeScheduleModal();
+            }
           }
         }
       }
     }
 
-    function quickUnschedule(goalId, subGoalId, taskId) {
+    function quickUnschedule(goalId, subGoalId, milestoneId, actionId) {
       const goal = goals.find(g => g.id === goalId);
       if (goal && goal.subGoals) {
         const sg = goal.subGoals.find(s => s.id === subGoalId);
-        if (sg && sg.tasks) {
-          const task = sg.tasks.find(t => t.id === taskId);
-          if (task) {
-            delete task.scheduledSlot;
-            delete task.scheduledDate;
-            delete task.durationMinutes;
-            showToast('Time block cleared');
-            saveState();
-            render();
+        if (sg && sg.milestones) {
+          const m = sg.milestones.find(item => item.id === milestoneId);
+          if (m && m.actions) {
+            const act = m.actions.find(a => a.id === actionId);
+            if (act) {
+              delete act.scheduledSlot;
+              delete act.scheduledDate;
+              delete act.durationMinutes;
+              showToast('Time block cleared');
+              saveState();
+              render();
+            }
           }
         }
       }
@@ -1405,7 +1693,6 @@
     // ==========================================
     function renderPlanner() {
       const activeDateLabel = document.getElementById('planner-active-date-label');
-      const activeDateSub = document.getElementById('planner-active-date-sub');
       const datePicker = document.getElementById('planner-date-picker');
       const timelineGrid = document.getElementById('planner-timeline-grid');
       const taskQueue = document.getElementById('planner-task-queue');
@@ -1420,38 +1707,36 @@
       if (datePicker) datePicker.value = plannerActiveDateStr;
       if (activeDayHint) activeDayHint.innerText = formattedActive;
 
-      const allTasks = getAllTasksWithContext();
+      const allActions = getAllActionsWithContext();
 
-      // Filter tasks scheduled specifically for this day
-      const scheduledTasks = allTasks.filter(t => t.scheduledDate === plannerActiveDateStr && t.scheduledSlot);
+      // Actions scheduled for this day
+      const scheduledActions = allActions.filter(act => act.scheduledDate === plannerActiveDateStr && act.scheduledSlot);
 
-      // Tasks available to schedule (either due today or unscheduled anywhere)
-      const unscheduledTasks = allTasks.filter(t => {
-        // Not already scheduled for this active date
-        const isScheduledThisDay = t.scheduledDate === plannerActiveDateStr && t.scheduledSlot;
+      // Actions available to schedule
+      const unscheduledActions = allActions.filter(act => {
+        const isScheduledThisDay = act.scheduledDate === plannerActiveDateStr && act.scheduledSlot;
         return !isScheduledThisDay;
       });
 
       if (scheduledCountBadge) {
-        scheduledCountBadge.innerText = `${scheduledTasks.length} time block${scheduledTasks.length === 1 ? '' : 's'}`;
+        scheduledCountBadge.innerText = `${scheduledActions.length} time block${scheduledActions.length === 1 ? '' : 's'}`;
       }
       if (unscheduledCountBadge) {
-        unscheduledCountBadge.innerText = unscheduledTasks.length;
+        unscheduledCountBadge.innerText = unscheduledActions.length;
       }
 
-      // Group scheduled tasks by slot (e.g., '09:00': [task1, ...])
+      // Group scheduled actions by slot
       const slotMap = {};
-      scheduledTasks.forEach(t => {
-        if (!slotMap[t.scheduledSlot]) slotMap[t.scheduledSlot] = [];
-        slotMap[t.scheduledSlot].push(t);
+      scheduledActions.forEach(act => {
+        if (!slotMap[act.scheduledSlot]) slotMap[act.scheduledSlot] = [];
+        slotMap[act.scheduledSlot].push(act);
       });
 
-      // Render 06:00 to 22:00 timeline rows
       let timelineHtml = '';
 
       TIMELINE_HOURS.forEach(hour => {
-        const tasksInHour = slotMap[hour] || [];
-        const isOccupied = tasksInHour.length > 0;
+        const actionsInHour = slotMap[hour] || [];
+        const isOccupied = actionsInHour.length > 0;
 
         timelineHtml += `
           <div class="py-3 sm:py-3.5 flex flex-col sm:flex-row sm:items-start group transition ${isOccupied ? 'bg-blue-50/20' : 'hover:bg-apple-subtle/50'}">
@@ -1463,13 +1748,13 @@
 
             <!-- Block Content Column -->
             <div class="flex-1 min-w-0 mt-2 sm:mt-0 pl-1">
-              ${tasksInHour.length === 0 ? `
+              ${actionsInHour.length === 0 ? `
                 <div class="flex items-center justify-between border border-dashed border-apple-border/70 rounded-2xl px-3 py-2 text-apple-tertiary hover:border-apple-blue/50 hover:bg-white transition group/slot">
-                  <span class="text-xs">No strategic action scheduled</span>
+                  <span class="text-xs">No tactical action scheduled</span>
                   <div class="opacity-0 group-hover/slot:opacity-100 flex items-center space-x-1.5 transition-opacity">
-                    ${unscheduledTasks.length > 0 ? `
-                      <button onclick="openScheduleModal('${unscheduledTasks[0].goalId}', '${unscheduledTasks[0].subGoalId}', '${unscheduledTasks[0].id}', '${hour}')" class="text-[11px] font-semibold text-apple-blue hover:underline px-2 py-0.5 rounded-lg bg-blue-50/70">
-                        + Assign Task
+                    ${unscheduledActions.length > 0 ? `
+                      <button onclick="openScheduleModal('${unscheduledActions[0].goalId}', '${unscheduledActions[0].subGoalId}', '${unscheduledActions[0].milestoneId}', '${unscheduledActions[0].id}', '${hour}')" class="text-[11px] font-semibold text-apple-blue hover:underline px-2 py-0.5 rounded-lg bg-blue-50/70">
+                        + Assign Action
                       </button>
                     ` : `
                       <span class="text-[10px] text-apple-secondary italic">Queue is empty</span>
@@ -1478,17 +1763,15 @@
                 </div>
               ` : `
                 <div class="space-y-2">
-                  ${tasksInHour.map(task => {
-                    const dur = task.durationMinutes || 60;
+                  ${actionsInHour.map(act => {
+                    const dur = act.durationMinutes || 60;
                     const durLabel = dur >= 60 ? `${dur / 60}h` : `${dur}m`;
 
                     return `
-                      <div class="bg-white border ${task.completed ? 'border-apple-border bg-gray-50/70' : 'border-apple-borderStrong shadow-xs'} rounded-2xl p-3 sm:p-3.5 transition-all">
+                      <div class="bg-white border ${act.completed ? 'border-apple-border bg-gray-50/70' : 'border-apple-borderStrong shadow-xs'} rounded-2xl p-3 sm:p-3.5 transition-all">
                         <div class="flex items-start justify-between gap-2">
-                          
-                          <!-- Checkbox + Info -->
                           <div class="flex items-start space-x-3 flex-1 min-w-0">
-                            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.goalId}', '${task.subGoalId}', '${task.id}')" class="apple-checkbox mt-0.5" aria-label="Mark task done">
+                            <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleAction('${act.goalId}', '${act.subGoalId}', '${act.milestoneId}', '${act.id}')" class="apple-checkbox mt-0.5" aria-label="Mark action done">
                             
                             <div class="flex-1 min-w-0">
                               <div class="flex flex-wrap items-center gap-1.5 mb-1">
@@ -1496,34 +1779,32 @@
                                   ${hour} • ${durLabel} block
                                 </span>
                                 <span class="text-[9px] px-2 py-0.2 rounded-full font-medium ${
-                                  task.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
-                                  task.priority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                                  act.milestonePriority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                                  act.milestonePriority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
                                   'bg-gray-100 text-gray-600'
                                 }">
-                                  ${escapeHtml(task.priority)}
+                                  ${escapeHtml(act.milestonePriority || 'Action')}
                                 </span>
                               </div>
 
-                              <h4 class="text-xs sm:text-sm font-semibold text-apple-dark ${task.completed ? 'line-through text-apple-tertiary' : ''}">
-                                ${escapeHtml(task.title)}
+                              <h4 class="text-xs sm:text-sm font-semibold text-apple-dark ${act.completed ? 'line-through text-apple-tertiary' : ''}">
+                                ${escapeHtml(act.title)}
                               </h4>
 
                               <p class="text-[10px] text-apple-secondary truncate mt-0.5">
-                                <span class="font-medium text-apple-dark">${escapeHtml(task.subGoalTitle)}</span> • ${escapeHtml(task.goalTitle)}
+                                <span class="font-medium text-apple-dark">${escapeHtml(act.milestoneTitle)}</span> • ${escapeHtml(act.subGoalTitle)}
                               </p>
                             </div>
                           </div>
 
-                          <!-- Actions: Change time / Unschedule -->
                           <div class="flex items-center space-x-1 flex-shrink-0">
-                            <button onclick="openScheduleModal('${task.goalId}', '${task.subGoalId}', '${task.id}', '${hour}')" title="Adjust time block" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
+                            <button onclick="openScheduleModal('${act.goalId}', '${act.subGoalId}', '${act.milestoneId}', '${act.id}', '${hour}')" title="Adjust time block" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
                               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </button>
-                            <button onclick="quickUnschedule('${task.goalId}', '${task.subGoalId}', '${task.id}')" title="Remove from timeline" class="p-1.5 text-apple-secondary hover:text-rose-600 rounded-xl hover:bg-rose-50 transition">
+                            <button onclick="quickUnschedule('${act.goalId}', '${act.subGoalId}', '${act.milestoneId}', '${act.id}')" title="Remove from timeline" class="p-1.5 text-apple-secondary hover:text-rose-600 rounded-xl hover:bg-rose-50 transition">
                               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                           </div>
-
                         </div>
                       </div>
                     `;
@@ -1537,17 +1818,17 @@
 
       timelineGrid.innerHTML = timelineHtml;
 
-      // Render Unscheduled Tasks Queue in sidebar
-      if (unscheduledTasks.length === 0) {
+      // Render Unscheduled Actions Queue in sidebar
+      if (unscheduledActions.length === 0) {
         taskQueue.innerHTML = `
           <div class="p-6 text-center bg-apple-subtle border border-dashed border-apple-border rounded-2xl">
             <svg class="w-6 h-6 text-apple-tertiary mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <p class="text-xs font-medium text-apple-secondary">All tactical actions are scheduled!</p>
+            <p class="text-xs font-medium text-apple-secondary">All actions are scheduled!</p>
           </div>
         `;
       } else {
-        taskQueue.innerHTML = unscheduledTasks.map(task => {
-          const isDueActiveDate = task.deadline === plannerActiveDateStr;
+        taskQueue.innerHTML = unscheduledActions.map(act => {
+          const isDueActiveDate = act.scheduledDate === plannerActiveDateStr || act.milestoneDeadline === plannerActiveDateStr;
 
           return `
             <div class="group bg-apple-subtle hover:bg-white border ${isDueActiveDate ? 'border-indigo-200 bg-indigo-50/20' : 'border-apple-border'} hover:border-apple-borderStrong rounded-2xl p-3 transition shadow-xs">
@@ -1558,29 +1839,29 @@
                       <span class="text-[9px] font-semibold px-2 py-0.2 rounded-full bg-indigo-100 text-indigo-700">Due Today</span>
                     ` : ''}
                     <span class="text-[9px] px-1.5 py-0.2 rounded-full font-medium ${
-                      task.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                      act.milestonePriority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
                       'bg-gray-100 text-gray-600'
                     }">
-                      ${escapeHtml(task.priority)}
+                      ${escapeHtml(act.milestonePriority || 'Action')}
                     </span>
-                    ${task.deadline ? `
+                    ${act.milestoneDeadline ? `
                       <span class="text-[9px] text-apple-secondary">
-                        ${formatDeadline(task.deadline)}
+                        ${formatDeadline(act.milestoneDeadline)}
                       </span>
                     ` : `
                       <span class="text-[9px] text-apple-tertiary italic">Undated</span>
                     `}
                   </div>
 
-                  <p class="text-xs font-semibold text-apple-dark leading-snug truncate ${task.completed ? 'line-through text-apple-tertiary' : ''}">
-                    ${escapeHtml(task.title)}
+                  <p class="text-xs font-semibold text-apple-dark leading-snug truncate ${act.completed ? 'line-through text-apple-tertiary' : ''}">
+                    ${escapeHtml(act.title)}
                   </p>
                   <p class="text-[10px] text-apple-secondary truncate mt-0.5">
-                    ${escapeHtml(task.subGoalTitle)}
+                    Milestone: ${escapeHtml(act.milestoneTitle)}
                   </p>
                 </div>
 
-                <button onclick="openScheduleModal('${task.goalId}', '${task.subGoalId}', '${task.id}', '09:00')" class="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-white bg-apple-blue hover:bg-apple-blueHover shadow-xs transition flex-shrink-0">
+                <button onclick="openScheduleModal('${act.goalId}', '${act.subGoalId}', '${act.milestoneId}', '${act.id}', '09:00')" class="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-white bg-apple-blue hover:bg-apple-blueHover shadow-xs transition flex-shrink-0">
                   Schedule
                 </button>
               </div>
@@ -1590,7 +1871,7 @@
       }
     }
 
-    // Calendar View Renderer
+    // Calendar View Renderer (tracks Milestones & their Actions)
     function renderCalendar() {
       const monthYearTitle = document.getElementById('calendar-month-year');
       const monthSummarySubtitle = document.getElementById('calendar-summary-subtitle');
@@ -1600,39 +1881,35 @@
       const monthName = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
       if (monthYearTitle) monthYearTitle.innerText = monthName;
 
-      // Group tasks by deadline date (YYYY-MM-DD)
-      const allTasks = getAllTasksWithContext();
-      const tasksByDate = {};
-      const undatedTasks = [];
-      let totalTasksInMonth = 0;
+      const allMilestones = getAllMilestonesWithContext();
+      const milestonesByDate = {};
+      const undatedMilestones = [];
+      let totalMilestonesInMonth = 0;
 
-      allTasks.forEach(t => {
-        if (t.deadline) {
-          if (!tasksByDate[t.deadline]) tasksByDate[t.deadline] = [];
-          tasksByDate[t.deadline].push(t);
+      allMilestones.forEach(m => {
+        if (m.deadline) {
+          if (!milestonesByDate[m.deadline]) milestonesByDate[m.deadline] = [];
+          milestonesByDate[m.deadline].push(m);
 
-          // Check if this deadline is in the currently viewed month
-          const [yr, mo] = t.deadline.split('-').map(Number);
+          const [yr, mo] = m.deadline.split('-').map(Number);
           if (yr === calCurrentYear && mo === calCurrentMonth + 1) {
-            totalTasksInMonth++;
+            totalMilestonesInMonth++;
           }
         } else {
-          undatedTasks.push(t);
+          undatedMilestones.push(m);
         }
       });
 
       if (monthSummarySubtitle) {
-        monthSummarySubtitle.innerText = `${totalTasksInMonth} action${totalTasksInMonth === 1 ? '' : 's'} scheduled for this month`;
+        monthSummarySubtitle.innerText = `${totalMilestonesInMonth} milestone${totalMilestonesInMonth === 1 ? '' : 's'} scheduled for this month`;
       }
 
-      // Compute calendar days
       const daysInMonth = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
-      const firstDayIndex = new Date(calCurrentYear, calCurrentMonth, 1).getDay(); // 0 = Sunday
+      const firstDayIndex = new Date(calCurrentYear, calCurrentMonth, 1).getDay();
       const prevMonthDays = new Date(calCurrentYear, calCurrentMonth, 0).getDate();
 
       let gridHtml = '';
 
-      // Leading days from previous month
       for (let i = firstDayIndex - 1; i >= 0; i--) {
         const d = prevMonthDays - i;
         gridHtml += `
@@ -1642,7 +1919,6 @@
         `;
       }
 
-      // Current Month Days
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -1650,11 +1926,9 @@
         const dayFormatted = String(d).padStart(2, '0');
         const monthFormatted = String(calCurrentMonth + 1).padStart(2, '0');
         const fullDateStr = `${calCurrentYear}-${monthFormatted}-${dayFormatted}`;
-        const dayTasks = tasksByDate[fullDateStr] || [];
+        const dayMilestones = milestonesByDate[fullDateStr] || [];
         const isSelected = selectedCalendarDateStr === fullDateStr;
         const isToday = todayStr === fullDateStr;
-
-        const completedCount = dayTasks.filter(t => t.completed).length;
 
         gridHtml += `
           <div onclick="selectCalendarDate('${fullDateStr}')" class="min-h-[85px] sm:min-h-[105px] p-1.5 sm:p-2 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
@@ -1668,30 +1942,28 @@
               <span class="text-xs font-semibold ${isToday ? 'w-5 h-5 rounded-full bg-apple-dark text-white flex items-center justify-center text-[10px]' : isSelected ? 'text-apple-blue font-bold' : 'text-apple-dark'}">
                 ${d}
               </span>
-              ${dayTasks.length > 0 ? `
-                <span class="text-[9px] font-semibold px-1.5 py-0.2 rounded-full ${completedCount === dayTasks.length ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-apple-secondary'}">
-                  ${completedCount}/${dayTasks.length}
+              ${dayMilestones.length > 0 ? `
+                <span class="text-[9px] font-semibold px-1.5 py-0.2 rounded-full bg-gray-100 text-apple-secondary">
+                  ${dayMilestones.length}
                 </span>
               ` : ''}
             </div>
 
-            <!-- Task Chips inside Day Cell -->
+            <!-- Milestone Chips inside Day Cell -->
             <div class="space-y-1 overflow-hidden flex-1">
-              ${dayTasks.slice(0, 2).map(t => `
+              ${dayMilestones.slice(0, 2).map(m => `
                 <div class="truncate text-[10px] px-1.5 py-0.5 rounded-lg border font-medium flex items-center space-x-1 ${
-                  t.completed 
-                    ? 'bg-gray-100 text-apple-secondary line-through border-gray-200' 
-                    : t.priority === 'High' 
-                      ? 'bg-rose-50 text-rose-700 border-rose-100' 
-                      : 'bg-blue-50/80 text-apple-blue border-blue-100'
-                }" title="${escapeHtml(t.title)}">
-                  <span class="w-1.5 h-1.5 rounded-full ${t.priority === 'High' ? 'bg-rose-500' : 'bg-apple-blue'} flex-shrink-0"></span>
-                  <span class="truncate">${escapeHtml(t.title)}</span>
+                  m.priority === 'High' 
+                    ? 'bg-rose-50 text-rose-700 border-rose-100' 
+                    : 'bg-blue-50/80 text-apple-blue border-blue-100'
+                }" title="${escapeHtml(m.title)}">
+                  <span class="w-1.5 h-1.5 rounded-full ${m.priority === 'High' ? 'bg-rose-500' : 'bg-apple-blue'} flex-shrink-0"></span>
+                  <span class="truncate">${escapeHtml(m.title)}</span>
                 </div>
               `).join('')}
-              ${dayTasks.length > 2 ? `
+              ${dayMilestones.length > 2 ? `
                 <div class="text-[9px] font-medium text-apple-secondary pl-1">
-                  +${dayTasks.length - 2} more
+                  +${dayMilestones.length - 2} more
                 </div>
               ` : ''}
             </div>
@@ -1699,7 +1971,6 @@
         `;
       }
 
-      // Trailing empty days to complete the calendar grid
       const totalCells = firstDayIndex + daysInMonth;
       const trailingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
       for (let i = 1; i <= trailingCells; i++) {
@@ -1712,14 +1983,11 @@
 
       calendarGrid.innerHTML = gridHtml;
 
-      // Render Selected Day Agenda in right column
-      renderSelectedDayAgenda(selectedCalendarDateStr, tasksByDate[selectedCalendarDateStr] || []);
-
-      // Render Undated Tasks
-      renderUndatedTasksList(undatedTasks);
+      renderSelectedDayAgenda(selectedCalendarDateStr, milestonesByDate[selectedCalendarDateStr] || []);
+      renderUndatedMilestonesList(undatedMilestones);
     }
 
-    function renderSelectedDayAgenda(dateStr, tasks) {
+    function renderSelectedDayAgenda(dateStr, milestones) {
       const titleEl = document.getElementById('selected-day-title');
       const countBadge = document.getElementById('selected-day-count-badge');
       const listContainer = document.getElementById('selected-day-tasks-list');
@@ -1728,81 +1996,96 @@
 
       const formatted = formatDeadline(dateStr);
       titleEl.innerText = formatted || 'Selected Date';
-      countBadge.innerText = `${tasks.length} action${tasks.length === 1 ? '' : 's'}`;
+      countBadge.innerText = `${milestones.length} milestone${milestones.length === 1 ? '' : 's'}`;
 
-      if (tasks.length === 0) {
+      if (milestones.length === 0) {
         listContainer.innerHTML = `
           <div class="p-6 text-center bg-apple-subtle border border-dashed border-apple-border rounded-2xl">
             <svg class="w-6 h-6 text-apple-tertiary mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <p class="text-xs font-medium text-apple-secondary">No deadlines scheduled for this day.</p>
+            <p class="text-xs font-medium text-apple-secondary">No milestones due on this day.</p>
           </div>
         `;
         return;
       }
 
-      listContainer.innerHTML = tasks.map(task => `
-        <div class="group bg-apple-subtle/80 hover:bg-white border border-apple-border hover:border-apple-borderStrong rounded-2xl p-3 transition shadow-xs">
-          <div class="flex items-start space-x-2.5">
-            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.goalId}', '${task.subGoalId}', '${task.id}')" class="apple-checkbox mt-0.5" aria-label="Mark task done">
+      listContainer.innerHTML = milestones.map(m => {
+        const actions = m.actions || [];
+        const actionsDone = actions.filter(a => a.completed).length;
 
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-medium text-apple-dark leading-snug ${task.completed ? 'line-through text-apple-tertiary' : ''}">
-                ${escapeHtml(task.title)}
-              </p>
-
-              <!-- Parent context -->
-              <p class="text-[10px] text-apple-secondary truncate mt-0.5">
-                <span class="font-medium text-apple-dark">${escapeHtml(task.subGoalTitle)}</span> • ${escapeHtml(task.goalTitle)}
-              </p>
-
-              <div class="flex items-center space-x-2 mt-2">
-                <span class="text-[9px] px-2 py-0.5 rounded-full font-medium ${
-                  task.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
-                  task.priority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
-                  'bg-gray-100 text-gray-600'
-                }">
-                  ${escapeHtml(task.priority)}
-                </span>
-                ${task.cadence ? `
-                  <span class="text-[9px] text-apple-secondary">
-                    ${escapeHtml(task.cadence)}
+        return `
+          <div class="group bg-apple-subtle/80 hover:bg-white border border-apple-border hover:border-apple-borderStrong rounded-2xl p-3.5 transition shadow-xs">
+            <div class="flex items-start justify-between">
+              <div class="flex-1 min-w-0 pr-2">
+                <div class="flex items-center space-x-1.5 mb-1">
+                  <span class="text-[9px] px-2 py-0.5 rounded-full font-medium ${
+                    m.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                    m.priority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                    'bg-gray-100 text-gray-600'
+                  }">
+                    ${escapeHtml(m.priority)}
                   </span>
-                ` : ''}
+                  <span class="text-[9px] text-apple-secondary font-medium">
+                    ${actionsDone}/${actions.length} actions complete
+                  </span>
+                </div>
+
+                <p class="text-xs font-semibold text-apple-dark leading-snug">
+                  ${escapeHtml(m.title)}
+                </p>
+
+                <p class="text-[10px] text-apple-secondary truncate mt-0.5">
+                  <span class="font-medium text-apple-dark">${escapeHtml(m.subGoalTitle)}</span> • ${escapeHtml(m.goalTitle)}
+                </p>
+              </div>
+
+              <div class="flex items-center space-x-1">
+                <button onclick="openMilestoneModal('${m.goalId}', '${m.subGoalId}', '${m.id}')" title="Edit Milestone" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
               </div>
             </div>
 
-            <!-- Edit/Delete Action Buttons -->
-            <div class="opacity-0 group-hover:opacity-100 flex items-center space-x-1 transition-opacity">
-              <button onclick="openTaskModal('${task.goalId}', '${task.subGoalId}', '${task.id}')" title="Edit Action" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-              </button>
-              <button onclick="promptDeleteTask('${task.goalId}', '${task.subGoalId}', '${task.id}')" title="Delete Action" class="p-1 text-apple-secondary hover:text-apple-danger rounded-lg hover:bg-rose-50 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              </button>
-            </div>
+            <!-- Milestone Nested Actions in Calendar Drawer -->
+            ${actions.length > 0 ? `
+              <div class="mt-2.5 pt-2 border-t border-apple-border/50 space-y-1.5">
+                ${actions.map(act => `
+                  <div class="flex items-center space-x-2 text-xs">
+                    <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleAction('${m.goalId}', '${m.subGoalId}', '${m.id}', '${act.id}')" class="apple-checkbox" aria-label="Mark action done">
+                    <span class="flex-1 truncate ${act.completed ? 'line-through text-apple-tertiary' : 'text-apple-dark'}">${escapeHtml(act.title)}</span>
+                    <button onclick="openScheduleModal('${m.goalId}', '${m.subGoalId}', '${m.id}', '${act.id}', '09:00')" title="Schedule Action" class="text-[10px] text-apple-blue hover:underline">
+                      Plan
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `
+              <div class="mt-2 pt-1 border-t border-apple-border/40 text-[10px] text-apple-secondary italic">
+                No tactical actions attached yet.
+              </div>
+            `}
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    function renderUndatedTasksList(tasks) {
+    function renderUndatedMilestonesList(milestones) {
       const countEl = document.getElementById('undated-tasks-count');
       const listEl = document.getElementById('undated-tasks-list');
       if (!countEl || !listEl) return;
 
-      countEl.innerText = tasks.length;
-      if (tasks.length === 0) {
-        listEl.innerHTML = `<p class="text-[11px] text-apple-secondary italic">All tasks have designated deadlines.</p>`;
+      countEl.innerText = milestones.length;
+      if (milestones.length === 0) {
+        listEl.innerHTML = `<p class="text-[11px] text-apple-secondary italic">All milestones have designated deadlines.</p>`;
         return;
       }
 
-      listEl.innerHTML = tasks.map(task => `
+      listEl.innerHTML = milestones.map(m => `
         <div class="flex items-center justify-between p-2 rounded-xl bg-apple-subtle border border-apple-border text-xs">
           <div class="flex-1 min-w-0 mr-2">
-            <p class="text-xs font-medium text-apple-dark truncate ${task.completed ? 'line-through text-apple-tertiary' : ''}">${escapeHtml(task.title)}</p>
-            <p class="text-[9px] text-apple-secondary truncate">${escapeHtml(task.subGoalTitle)}</p>
+            <p class="text-xs font-medium text-apple-dark truncate">${escapeHtml(m.title)}</p>
+            <p class="text-[9px] text-apple-secondary truncate">${escapeHtml(m.subGoalTitle)}</p>
           </div>
-          <button onclick="openTaskModal('${task.goalId}', '${task.subGoalId}', '${task.id}')" class="text-[10px] font-medium text-apple-blue hover:underline flex-shrink-0">
+          <button onclick="openMilestoneModal('${m.goalId}', '${m.subGoalId}', '${m.id}')" class="text-[10px] font-medium text-apple-blue hover:underline flex-shrink-0">
             Set Date
           </button>
         </div>
@@ -1822,22 +2105,25 @@
     function renderTree() {
       const container = document.getElementById('tree-container');
 
-      // Aggregate global statistics
-      let totalTasksCount = 0;
-      let completedTasksCount = 0;
+      let totalActionsCount = 0;
+      let completedActionsCount = 0;
+      let totalMilestonesCount = 0;
       let totalSubGoalsCount = 0;
 
       goals.forEach(g => {
         (g.subGoals || []).forEach(sg => {
           totalSubGoalsCount++;
-          (sg.tasks || []).forEach(t => {
-            totalTasksCount++;
-            if (t.completed) completedTasksCount++;
+          (sg.milestones || []).forEach(m => {
+            totalMilestonesCount++;
+            (m.actions || []).forEach(act => {
+              totalActionsCount++;
+              if (act.completed) completedActionsCount++;
+            });
           });
         });
       });
 
-      const overallPct = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
+      const overallPct = totalActionsCount > 0 ? Math.round((completedActionsCount / totalActionsCount) * 100) : 0;
       
       const overallPctEl = document.getElementById('overall-percentage');
       if (overallPctEl) overallPctEl.innerText = `${overallPct}%`;
@@ -1852,7 +2138,9 @@
           <span class="text-gray-300">•</span>
           <span>${totalSubGoalsCount} Sub-goals</span>
           <span class="text-gray-300">•</span>
-          <span class="text-apple-dark font-semibold">${completedTasksCount}/${totalTasksCount} Actions</span>
+          <span>${totalMilestonesCount} Milestones</span>
+          <span class="text-gray-300">•</span>
+          <span class="text-apple-dark font-semibold">${completedActionsCount}/${totalActionsCount} Actions</span>
         `;
       }
 
@@ -1863,7 +2151,7 @@
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
             </div>
             <h3 class="text-sm font-semibold text-apple-dark">No Strategic Goals Defined</h3>
-            <p class="text-xs text-apple-secondary mt-1 mb-6">Create your first strategic horizon goal to branch into milestones and daily execution.</p>
+            <p class="text-xs text-apple-secondary mt-1 mb-6">Create your first strategic horizon goal to branch into milestones and daily actions.</p>
             <button onclick="openGoalModal()" class="px-4 py-2 bg-apple-blue text-white rounded-2xl text-xs font-medium shadow-sm hover:bg-apple-blueHover transition">
               Create Strategic Goal
             </button>
@@ -1872,20 +2160,24 @@
         return;
       }
 
-      // Render Goals -> Sub-Goals -> Tasks
-      container.innerHTML = goals.map((goal, gIndex) => {
+      // Render 4-tier tree: Goals -> Sub-Goals -> Milestones -> Actions
+      container.innerHTML = goals.map((goal) => {
         const subGoals = goal.subGoals || [];
-        let goalTasksTotal = 0;
-        let goalTasksDone = 0;
+        let goalActionsTotal = 0;
+        let goalActionsDone = 0;
+        let goalMilestonesCount = 0;
 
         subGoals.forEach(sg => {
-          (sg.tasks || []).forEach(t => {
-            goalTasksTotal++;
-            if (t.completed) goalTasksDone++;
+          (sg.milestones || []).forEach(m => {
+            goalMilestonesCount++;
+            (m.actions || []).forEach(act => {
+              goalActionsTotal++;
+              if (act.completed) goalActionsDone++;
+            });
           });
         });
 
-        const goalProgress = goalTasksTotal > 0 ? Math.round((goalTasksDone / goalTasksTotal) * 100) : 0;
+        const goalProgress = goalActionsTotal > 0 ? Math.round((goalActionsDone / goalActionsTotal) * 100) : 0;
 
         return `
           <div class="relative flex flex-col items-center">
@@ -1902,7 +2194,7 @@
                       ${escapeHtml(goal.horizon)}
                     </span>
                     <span class="text-[10px] font-medium text-apple-secondary">
-                      ${subGoals.length} Sub-goals • ${goalTasksTotal} Actions
+                      ${subGoals.length} Sub-goals • ${goalMilestonesCount} Milestones • ${goalActionsTotal} Actions
                     </span>
                   </div>
 
@@ -1911,7 +2203,6 @@
                   </h2>
                 </div>
 
-                <!-- Goal Action Buttons -->
                 <div class="flex items-center space-x-1.5 flex-shrink-0">
                   <button onclick="openGoalModal('${goal.id}')" title="Edit Strategic Goal" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -1925,7 +2216,7 @@
                 </div>
               </div>
 
-              <!-- Progress Bar -->
+              <!-- Goal Progress Bar -->
               <div class="mt-4 pt-3 border-t border-apple-border/50 flex items-center justify-between gap-4">
                 <div class="flex-1">
                   <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
@@ -1934,7 +2225,7 @@
                 </div>
                 <div class="text-[11px] font-semibold text-apple-secondary flex items-center space-x-1 flex-shrink-0">
                   <span>${goalProgress}%</span>
-                  <span class="text-gray-300">(${goalTasksDone}/${goalTasksTotal})</span>
+                  <span class="text-gray-300">(${goalActionsDone}/${goalActionsTotal} actions)</span>
                 </div>
                 <button onclick="openSubGoalModal('${goal.id}')" class="inline-flex items-center space-x-1 text-xs font-medium text-apple-blue hover:text-apple-blueHover bg-blue-50/60 hover:bg-blue-50 px-2.5 py-1 rounded-full transition ml-2">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -1943,16 +2234,14 @@
               </div>
             </div>
 
-            <!-- Tier 2 & 3 Branches: Sub-Goals and Tasks -->
+            <!-- Tier 2 & 3 & 4 Branches: Sub-Goals -> Milestones -> Actions -->
             ${!goal.collapsed ? `
-              <!-- Vertical Stem from Goal Card down to Sub-goals -->
               ${subGoals.length > 0 ? `<div class="tree-stem-v h-8"></div>` : ''}
 
-              <!-- Sub-Goals Container -->
               <div class="w-full">
                 ${subGoals.length === 0 ? `
                   <div class="mt-3 text-center py-4 bg-white/40 border border-dashed border-apple-border rounded-3xl max-w-md mx-auto">
-                    <p class="text-xs text-apple-secondary mb-2">No milestones defined under this goal yet.</p>
+                    <p class="text-xs text-apple-secondary mb-2">No sub-goals defined under this goal yet.</p>
                     <button onclick="openSubGoalModal('${goal.id}')" class="text-xs font-medium text-apple-blue hover:underline inline-flex items-center space-x-1">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                       <span>Add First Sub-Goal</span>
@@ -1961,10 +2250,18 @@
                 ` : `
                   <div class="grid grid-cols-1 md:grid-cols-${Math.min(subGoals.length, 2)} lg:grid-cols-${Math.min(subGoals.length, 3)} gap-6 items-start justify-center">
                     ${subGoals.map(sg => {
-                      const tasks = sg.tasks || [];
-                      const sgTotal = tasks.length;
-                      const sgDone = tasks.filter(t => t.completed).length;
-                      const sgProgress = sgTotal > 0 ? Math.round((sgDone / sgTotal) * 100) : 0;
+                      const milestones = sg.milestones || [];
+                      let sgActionsTotal = 0;
+                      let sgActionsDone = 0;
+
+                      milestones.forEach(m => {
+                        (m.actions || []).forEach(act => {
+                          sgActionsTotal++;
+                          if (act.completed) sgActionsDone++;
+                        });
+                      });
+
+                      const sgProgress = sgActionsTotal > 0 ? Math.round((sgActionsDone / sgActionsTotal) * 100) : 0;
 
                       return `
                         <div class="flex flex-col items-center w-full">
@@ -1993,89 +2290,140 @@
                                 <button onclick="promptDeleteSubGoal('${goal.id}', '${sg.id}')" title="Delete Sub-Goal" class="p-1 text-apple-secondary hover:text-apple-danger rounded-lg hover:bg-rose-50 transition">
                                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
-                                <button onclick="toggleSubGoalCollapse('${goal.id}', '${sg.id}')" title="${sg.collapsed ? 'Expand Actions' : 'Collapse Actions'}" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
+                                <button onclick="toggleSubGoalCollapse('${goal.id}', '${sg.id}')" title="${sg.collapsed ? 'Expand Milestones' : 'Collapse Milestones'}" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
                                   <svg class="w-3.5 h-3.5 transform transition-transform duration-200 ${sg.collapsed ? '-rotate-90' : 'rotate-0'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </button>
                               </div>
                             </div>
 
-                            <!-- Sub-Goal Progress & Add Action -->
+                            <!-- Sub-Goal Progress & Add Milestone Button -->
                             <div class="mt-3 pt-2.5 border-t border-apple-border/40 flex items-center justify-between text-xs">
                               <div class="flex items-center space-x-2 flex-1 mr-2">
                                 <div class="w-full max-w-[80px] bg-gray-100 rounded-full h-1 overflow-hidden">
                                   <div class="bg-apple-blue h-1 rounded-full transition-all duration-300" style="width: ${sgProgress}%"></div>
                                 </div>
-                                <span class="text-[10px] text-apple-secondary font-medium">${sgDone}/${sgTotal}</span>
+                                <span class="text-[10px] text-apple-secondary font-medium">${sgActionsDone}/${sgActionsTotal} actions</span>
                               </div>
 
-                              <button onclick="openTaskModal('${goal.id}', '${sg.id}')" class="text-[11px] font-medium text-apple-blue hover:text-apple-blueHover flex items-center space-x-1 bg-blue-50/50 hover:bg-blue-50 px-2 py-0.5 rounded-full transition">
+                              <button onclick="openMilestoneModal('${goal.id}', '${sg.id}')" class="text-[11px] font-medium text-apple-blue hover:text-apple-blueHover flex items-center space-x-1 bg-blue-50/50 hover:bg-blue-50 px-2 py-0.5 rounded-full transition">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                <span>Action</span>
+                                <span>Milestone</span>
                               </button>
                             </div>
                           </div>
 
-                          <!-- Tier 3: Tactical Actions / Tasks under this Sub-Goal -->
+                          <!-- Tier 3: Milestones & Tier 4: Nested Tactical Actions -->
                           ${!sg.collapsed ? `
-                            <!-- Stem to tasks -->
-                            ${tasks.length > 0 ? `<div class="tree-stem-v h-4"></div>` : ''}
+                            ${milestones.length > 0 ? `<div class="tree-stem-v h-4"></div>` : ''}
 
-                            <div class="w-full space-y-2 mt-1">
-                              ${tasks.length === 0 ? `
+                            <div class="w-full space-y-3 mt-1">
+                              ${milestones.length === 0 ? `
                                 <div class="p-3 text-center bg-white/40 border border-dashed border-apple-border rounded-2xl">
-                                  <span class="text-[11px] text-apple-secondary">No tactical actions yet.</span>
+                                  <span class="text-[11px] text-apple-secondary">No milestones yet.</span>
                                 </div>
-                              ` : tasks.map(task => `
-                                <div class="group relative bg-white border border-apple-border rounded-2xl p-3 shadow-xs hover:border-apple-borderStrong hover:shadow-apple transition-all duration-200">
-                                  <div class="flex items-start space-x-2.5">
-                                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${goal.id}', '${sg.id}', '${task.id}')" class="apple-checkbox mt-0.5" aria-label="Mark task done">
+                              ` : milestones.map(m => {
+                                const actions = m.actions || [];
+                                const mActionsDone = actions.filter(a => a.completed).length;
+                                const mProgress = actions.length > 0 ? Math.round((mActionsDone / actions.length) * 100) : 0;
 
-                                    <div class="flex-1 min-w-0">
-                                      <p class="text-xs font-medium text-apple-dark tracking-tight leading-snug transition ${task.completed ? 'line-through text-apple-tertiary' : ''}">
-                                        ${escapeHtml(task.title)}
-                                      </p>
-
-                                      <!-- Badges: Priority, Deadline, Cadence -->
-                                      <div class="flex flex-wrap items-center gap-1.5 mt-2">
-                                        <!-- Priority Badge -->
-                                        <span class="text-[9px] px-2 py-0.5 rounded-full font-medium ${
-                                          task.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
-                                          task.priority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
-                                          'bg-gray-100 text-gray-600'
-                                        }">
-                                          ${escapeHtml(task.priority)}
-                                        </span>
-
-                                        <!-- Target Deadline Badge -->
-                                        ${task.deadline ? `
-                                          <span class="text-[9px] px-2 py-0.5 rounded-full border flex items-center space-x-1 ${getDeadlineToBadge(task.deadline, task.completed)}">
-                                            <svg class="w-2.5 h-2.5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                            <span>${formatDeadline(task.deadline)}</span>
+                                return `
+                                  <div class="group/m relative bg-white border border-apple-border rounded-2xl p-3.5 shadow-xs hover:border-apple-borderStrong hover:shadow-apple transition-all duration-200">
+                                    
+                                    <!-- Milestone Header -->
+                                    <div class="flex items-start justify-between gap-2">
+                                      <div class="flex-1 min-w-0">
+                                        <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                          <span class="text-[9px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200/60 px-2 py-0.2 rounded-full">
+                                            Milestone
                                           </span>
-                                        ` : ''}
-
-                                        <!-- Cadence Badge -->
-                                        ${task.cadence ? `
-                                          <span class="text-[9px] text-apple-secondary flex items-center space-x-1">
-                                            <svg class="w-2.5 h-2.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                            <span>${escapeHtml(task.cadence)}</span>
+                                          <span class="text-[9px] px-2 py-0.2 rounded-full font-medium ${
+                                            m.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                                            m.priority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                                            'bg-gray-100 text-gray-600'
+                                          }">
+                                            ${escapeHtml(m.priority)}
                                           </span>
-                                        ` : ''}
+                                          ${m.deadline ? `
+                                            <span class="text-[9px] px-2 py-0.2 rounded-full border flex items-center space-x-1 ${getDeadlineToBadge(m.deadline)}">
+                                              <svg class="w-2.5 h-2.5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                              <span>${formatDeadline(m.deadline)}</span>
+                                            </span>
+                                          ` : ''}
+                                        </div>
+
+                                        <h4 class="text-xs sm:text-sm font-semibold text-apple-dark tracking-tight leading-snug">
+                                          ${escapeHtml(m.title)}
+                                        </h4>
+                                      </div>
+
+                                      <div class="flex items-center space-x-1 flex-shrink-0">
+                                        <button onclick="openMilestoneModal('${goal.id}', '${sg.id}', '${m.id}')" title="Edit Milestone" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
+                                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                        </button>
+                                        <button onclick="promptDeleteMilestone('${goal.id}', '${sg.id}', '${m.id}')" title="Delete Milestone" class="p-1 text-apple-secondary hover:text-apple-danger rounded-lg hover:bg-rose-50 transition">
+                                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                        <button onclick="toggleMilestoneCollapse('${goal.id}', '${sg.id}', '${m.id}')" title="${m.collapsed ? 'Expand Actions' : 'Collapse Actions'}" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
+                                          <svg class="w-3.5 h-3.5 transform transition-transform duration-200 ${m.collapsed ? '-rotate-90' : 'rotate-0'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
                                       </div>
                                     </div>
 
-                                    <!-- Task Action Buttons (Edit / Delete) -->
-                                    <div class="opacity-0 group-hover:opacity-100 flex items-center space-x-1 transition-opacity">
-                                      <button onclick="openTaskModal('${goal.id}', '${sg.id}', '${task.id}')" title="Edit Action" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                      </button>
-                                      <button onclick="promptDeleteTask('${goal.id}', '${sg.id}', '${task.id}')" title="Delete Action" class="p-1 text-apple-secondary hover:text-apple-danger rounded-lg hover:bg-rose-50 transition">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <!-- Milestone Action Progress Summary & Add Action Button -->
+                                    <div class="mt-2.5 pt-2 border-t border-apple-border/50 flex items-center justify-between">
+                                      <div class="flex items-center space-x-2 flex-1 mr-2">
+                                        <div class="w-full max-w-[70px] bg-gray-100 rounded-full h-1 overflow-hidden">
+                                          <div class="bg-emerald-500 h-1 rounded-full transition-all duration-300" style="width: ${mProgress}%"></div>
+                                        </div>
+                                        <span class="text-[10px] text-apple-secondary font-medium">${mActionsDone}/${actions.length}</span>
+                                      </div>
+
+                                      <button onclick="openActionModal('${goal.id}', '${sg.id}', '${m.id}')" class="text-[10px] font-medium text-apple-blue hover:text-apple-blueHover flex items-center space-x-1 bg-blue-50/60 hover:bg-blue-50 px-2 py-0.5 rounded-full transition">
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        <span>+ Action</span>
                                       </button>
                                     </div>
+
+                                    <!-- Tier 4: Tactical Action Items under this Milestone -->
+                                    ${!m.collapsed ? `
+                                      <div class="mt-2.5 space-y-1.5 pl-1 border-l-2 border-gray-100 ml-1">
+                                        ${actions.length === 0 ? `
+                                          <p class="text-[10px] text-apple-tertiary italic py-1">No actions assigned yet. Click "+ Action" above.</p>
+                                        ` : actions.map(act => `
+                                          <div class="group/act flex items-center justify-between p-1.5 rounded-xl hover:bg-apple-subtle transition">
+                                            <div class="flex items-center space-x-2 flex-1 min-w-0 mr-2">
+                                              <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleAction('${goal.id}', '${sg.id}', '${m.id}', '${act.id}')" class="apple-checkbox" aria-label="Mark action done">
+                                              
+                                              <div class="flex-1 min-w-0">
+                                                <p class="text-xs font-medium truncate ${act.completed ? 'line-through text-apple-tertiary' : 'text-apple-dark'}">
+                                                  ${escapeHtml(act.title)}
+                                                </p>
+                                                ${act.cadence ? `
+                                                  <span class="text-[9px] text-apple-secondary">
+                                                    ${escapeHtml(act.cadence)}
+                                                  </span>
+                                                ` : ''}
+                                              </div>
+                                            </div>
+
+                                            <div class="opacity-0 group-hover/act:opacity-100 flex items-center space-x-1 transition-opacity">
+                                              <button onclick="openScheduleModal('${goal.id}', '${sg.id}', '${m.id}', '${act.id}', '09:00')" title="Schedule in Day Planner" class="p-1 text-apple-secondary hover:text-apple-blue rounded-lg hover:bg-blue-50 transition">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                              </button>
+                                              <button onclick="openActionModal('${goal.id}', '${sg.id}', '${m.id}', '${act.id}')" title="Edit Action" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                              </button>
+                                              <button onclick="promptDeleteAction('${goal.id}', '${sg.id}', '${m.id}', '${act.id}')" title="Delete Action" class="p-1 text-apple-secondary hover:text-apple-danger rounded-lg hover:bg-rose-50 transition">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                              </button>
+                                            </div>
+                                          </div>
+                                        `).join('')}
+                                      </div>
+                                    ` : ''}
                                   </div>
-                                </div>
-                              `).join('')}
+                                `;
+                              }).join('')}
                             </div>
                           ` : ''}
 
