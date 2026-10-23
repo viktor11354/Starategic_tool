@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strata • Strategic Execution Tree</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            apple: {
+              bg: '#F5F5F7',
+              card: '#FFFFFF',
+              subtle: '#FBFBFD',
+              border: 'rgba(0, 0, 0, 0.08)',
+              borderStrong: 'rgba(0, 0, 0, 0.14)',
+              dark: '#1D1D1F',
+              secondary: '#6E6E73',
+              tertiary: '#86868B',
+              blue: '#0071E3',
+              blueHover: '#0077ED',
+              success: '#34C759',
+              warning: '#FF9500',
+              danger: '#FF3B30'
+            }
+          },
+          boxShadow: {
+            'apple': '0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
+            'apple-hover': '0 12px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04)',
+            'apple-modal': '0 24px 48px -12px rgba(0, 0, 0, 0.18)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F5F5F7;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1D1D1F;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Tree Branching Stems */
+    .tree-stem-v {
+      width: 1.5px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.06) 100%);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .tree-stem-h {
+      height: 1.5px;
+      background: rgba(0,0,0,0.08);
+    }
+
+    /* Custom Checkbox */
+    .apple-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 1.5px solid #D2D2D7;
+      border-radius: 9999px;
+      outline: none;
+      cursor: pointer;
+      display: inline-grid;
+      place-content: center;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      background-color: #FFFFFF;
+      flex-shrink: 0;
+    }
+    .apple-checkbox:hover {
+      border-color: #0071E3;
+      transform: scale(1.05);
+    }
+    .apple-checkbox:checked {
+      background-color: #34C759;
+      border-color: #34C759;
+    }
+    .apple-checkbox:checked::before {
+      content: "";
+      width: 0.35rem;
+      height: 0.65rem;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg) translate(-1px, -1px);
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.25);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-apple-blue selection:text-white pb-20">
+
+  <!-- Apple Glass Navigation Bar -->
+  <header class="sticky top-0 z-30 backdrop-blur-xl bg-apple-bg/80 border-b border-apple-border/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded-xl bg-apple-dark text-white flex items-center justify-center font-semibold text-sm shadow-sm">
+          S
+        </div>
+        <div>
+          <span class="font-semibold text-sm sm:text-base tracking-tight text-apple-dark">Strata</span>
+          <span class="text-xs text-apple-secondary font-normal ml-2 hidden sm:inline-block">Strategic Execution Tree</span>
+        </div>
+      </div>
+
+      <!-- Segmented View Switcher -->
+      <div class="flex items-center bg-black/[0.05] p-1 rounded-2xl border border-apple-border/70 text-xs font-medium">
+        <button id="nav-btn-tree" onclick="switchView('tree')" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white shadow-xs text-apple-dark font-semibold transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+          <span>Tree</span>
+        </button>
+        <button id="nav-btn-calendar" onclick="switchView('calendar')" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-apple-secondary hover:text-apple-dark transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <span>Calendar</span>
+        </button>
+        <button id="nav-btn-planner" onclick="switchView('planner')" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-apple-secondary hover:text-apple-dark transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>Day Planner</span>
+        </button>
+      </div>
+
+      <!-- Real-time Progress Statistics -->
+      <div class="flex items-center space-x-2 sm:space-x-4">
+        <div id="stats-pill" class="hidden md:flex items-center space-x-2 bg-white/70 border border-apple-border px-3 py-1.5 rounded-full text-xs font-medium text-apple-secondary shadow-sm">
+          <span>0 Goals</span>
+          <span class="text-gray-300">•</span>
+          <span>0 Sub-goals</span>
+          <span class="text-gray-300">•</span>
+          <span>0/0 Actions</span>
+        </div>
+
+        <button onclick="openGoalModal()" class="inline-flex items-center space-x-1.5 bg-apple-blue hover:bg-apple-blueHover text-white px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <span class="hidden sm:inline">New Goal</span>
+        </button>
+
+        <button onclick="resetToSampleData()" title="Reset to sample strategic data" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-full hover:bg-black/5 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Canvas Canvas -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+    <!-- PAGE 1: STRATEGIC TREE VIEW -->
+    <section id="view-tree">
+      <!-- Root Level 0: Strategic North Star Apex -->
+      <div class="flex flex-col items-center">
+        <div class="relative group bg-white/90 backdrop-blur-sm border border-apple-border px-6 py-4 rounded-3xl shadow-apple text-center max-w-md w-full transition duration-300 hover:shadow-apple-hover">
+          <div class="inline-flex items-center space-x-1.5 text-[11px] font-semibold uppercase tracking-wider text-apple-blue bg-blue-50/70 border border-blue-100/60 px-2.5 py-0.5 rounded-full mb-1.5">
+            <span>Vision & Strategy</span>
+          </div>
+          <h1 class="text-base sm:text-lg font-semibold tracking-tight text-apple-dark">2026-2027 Strategic Horizon</h1>
+          <p class="text-xs text-apple-secondary mt-0.5">Translating macro objectives into weekly milestones and everyday tactical actions</p>
+          
+          <div class="mt-3 pt-3 border-t border-apple-border/50 flex items-center justify-between text-xs text-apple-secondary">
+            <span id="overall-rate-label">Overall Completion</span>
+            <span id="overall-percentage" class="font-semibold text-apple-dark">0%</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+            <div id="overall-progress-bar" class="bg-apple-blue h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Connecting Stem Apex to Goals -->
+        <div class="tree-stem-v h-8"></div>
+      </div>
+
+      <!-- Tree Tier Container -->
+      <div id="tree-container" class="space-y-12">
+        <!-- Injected Dynamically via renderTree() -->
+      </div>
+    </section>
+
+    <!-- PAGE 2: DEADLINES CALENDAR VIEW -->
+    <section id="view-calendar" class="hidden pb-12">
+      <!-- Top Calendar Controls & Month Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white/80 backdrop-blur-sm p-4 sm:p-5 rounded-3xl border border-apple-border shadow-apple">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-2xl bg-blue-50 text-apple-blue flex items-center justify-center font-semibold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          </div>
+          <div>
+            <h2 id="calendar-month-year" class="text-lg sm:text-xl font-bold tracking-tight text-apple-dark">November 2026</h2>
+            <p id="calendar-summary-subtitle" class="text-xs text-apple-secondary">0 tasks scheduled for this month</p>
+          </div>
+        </div>
+
+        <!-- Navigation Controls: Prev, Next, Today -->
+        <div class="flex items-center space-x-2">
+          <button onclick="calPrevMonth()" class="p-2 rounded-xl text-apple-secondary hover:text-apple-dark hover:bg-gray-100 border border-apple-border transition" title="Previous Month">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          </button>
+          <button onclick="calToday()" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-apple-dark hover:bg-gray-100 border border-apple-border transition">
+            Today
+          </button>
+          <button onclick="calNextMonth()" class="p-2 rounded-xl text-apple-secondary hover:text-apple-dark hover:bg-gray-100 border border-apple-border transition" title="Next Month">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Layout: Calendar Grid + Day Details Panel -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Monthly Grid (8 cols on lg) -->
+        <div class="lg:col-span-8 bg-white rounded-3xl border border-apple-border shadow-apple p-4 sm:p-6 overflow-hidden">
+          <!-- Weekday Labels -->
+          <div class="grid grid-cols-7 mb-2 text-center text-[11px] font-semibold tracking-wider text-apple-secondary uppercase">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+          </div>
+
+          <!-- Calendar Days Grid -->
+          <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 sm:gap-2">
+            <!-- Dynamically populated via renderCalendar() -->
+          </div>
+        </div>
+
+        <!-- Right: Selected Day Inspector & Undated Tasks (4 cols on lg) -->
+        <div class="lg:col-span-4 space-y-6">
+          
+          <!-- Selected Day Agenda Card -->
+          <div class="bg-white rounded-3xl border border-apple-border shadow-apple p-5">
+            <div class="flex items-center justify-between pb-3 border-b border-apple-border/50 mb-3">
+              <div>
+                <span class="text-[10px] font-semibold uppercase tracking-wider text-apple-blue bg-blue-50/80 px-2 py-0.5 rounded-full">Day Agenda</span>
+                <h3 id="selected-day-title" class="text-sm font-semibold text-apple-dark mt-1">Select a day</h3>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button onclick="goToPlannerForDay(selectedCalendarDateStr)" title="Plan this day in Day Planner" class="px-2.5 py-1 rounded-xl text-[11px] font-medium text-apple-blue hover:bg-blue-50/70 border border-apple-blue/20 transition flex items-center space-x-1">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  <span>Plan Day</span>
+                </button>
+                <span id="selected-day-count-badge" class="text-xs font-medium text-apple-secondary bg-gray-100 px-2.5 py-0.5 rounded-full">0 actions</span>
+              </div>
+            </div>
+
+            <!-- Task Items for Selected Day -->
+            <div id="selected-day-tasks-list" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Tasks Without Deadlines Accordion/Section -->
+          <div class="bg-white/80 rounded-3xl border border-apple-border shadow-apple p-5">
+            <div class="flex items-center justify-between pb-2 mb-2">
+              <div class="flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full bg-apple-secondary"></span>
+                <h4 class="text-xs font-semibold text-apple-dark">Undated Actions</h4>
+              </div>
+              <span id="undated-tasks-count" class="text-[10px] font-medium text-apple-secondary bg-gray-100 px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <div id="undated-tasks-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 3: HOUR-BY-HOUR DAY PLANNER VIEW -->
+    <section id="view-planner" class="hidden pb-12">
+      <!-- Planner Header & Date Selector -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white/80 backdrop-blur-sm p-4 sm:p-5 rounded-3xl border border-apple-border shadow-apple">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 id="planner-active-date-label" class="text-lg sm:text-xl font-bold tracking-tight text-apple-dark">Today</h2>
+              <span id="planner-scheduled-count-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">0 blocks</span>
+            </div>
+            <p id="planner-active-date-sub" class="text-xs text-apple-secondary">Hourly schedule & execution timeline</p>
+          </div>
+        </div>
+
+        <!-- Day Navigation Controls -->
+        <div class="flex items-center space-x-2">
+          <button onclick="plannerPrevDay()" class="p-2 rounded-xl text-apple-secondary hover:text-apple-dark hover:bg-gray-100 border border-apple-border transition" title="Previous Day">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          </button>
+          <button onclick="plannerToday()" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-apple-dark hover:bg-gray-100 border border-apple-border transition">
+            Today
+          </button>
+          <button onclick="plannerNextDay()" class="p-2 rounded-xl text-apple-secondary hover:text-apple-dark hover:bg-gray-100 border border-apple-border transition" title="Next Day">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+          <div class="relative ml-2">
+            <input type="date" id="planner-date-picker" onchange="plannerSelectDate(this.value)" class="bg-apple-subtle border border-apple-border rounded-xl px-2.5 py-1.5 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Planner Layout: Hourly Timeline (8 cols) + Unscheduled Tasks Sidebar (4 cols) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Hourly Timeline -->
+        <div class="lg:col-span-8 bg-white rounded-3xl border border-apple-border shadow-apple p-5 sm:p-6">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-apple-border/60">
+            <div class="flex items-center space-x-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-apple-blue"></span>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-apple-secondary">Daily Timeline (06:00 – 22:00)</h3>
+            </div>
+            <span class="text-[11px] text-apple-tertiary">Click "+ Add to Slot" or assign from the task drawer</span>
+          </div>
+
+          <!-- Timeline Rows Container -->
+          <div id="planner-timeline-grid" class="divide-y divide-apple-border/50">
+            <!-- Dynamically populated via renderPlannerTimeline() -->
+          </div>
+        </div>
+
+        <!-- Task Drawer: Tasks to Schedule -->
+        <div class="lg:col-span-4 space-y-6">
+          
+          <!-- Tasks Available for Scheduling -->
+          <div class="bg-white rounded-3xl border border-apple-border shadow-apple p-5">
+            <div class="flex items-center justify-between pb-3 border-b border-apple-border/50 mb-3">
+              <div>
+                <span class="text-[10px] font-semibold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Task Queue</span>
+                <h3 class="text-sm font-semibold text-apple-dark mt-1">Available to Schedule</h3>
+              </div>
+              <span id="planner-unscheduled-count" class="text-xs font-medium text-apple-secondary bg-gray-100 px-2.5 py-0.5 rounded-full">0</span>
+            </div>
+
+            <p class="text-[11px] text-apple-secondary mb-3">Select any task below to assign it directly into an hour block for <span id="planner-active-day-hint" class="font-semibold text-apple-dark">this date</span>.</p>
+
+            <!-- Tasks Queue List -->
+            <div id="planner-task-queue" class="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Quick Tip Card -->
+          <div class="bg-apple-subtle/80 rounded-3xl border border-apple-border p-4.5">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 rounded-xl bg-blue-50 text-apple-blue flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <div>
+                <h4 class="text-xs font-semibold text-apple-dark">Strategic Timeboxing</h4>
+                <p class="text-[11px] text-apple-secondary mt-0.5 leading-relaxed">Allocate high-priority tactical actions to morning deep-work blocks. Checking off an item in the timeline automatically updates your tree & calendar completion.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: Strategic Goal (Add / Edit) -->
+  <div id="goal-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-apple-modal border border-apple-border transition-all transform scale-100">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 id="goal-modal-header" class="text-base font-semibold text-apple-dark">Add Strategic Goal</h3>
+          <p class="text-xs text-apple-secondary">Define an overarching high-level anchor objective</p>
+        </div>
+        <button onclick="closeGoalModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="goal-form" onsubmit="handleSaveGoal(event)" class="space-y-4">
+        <input type="hidden" id="goal-edit-id">
+        <div>
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Goal Statement</label>
+          <input type="text" id="goal-title-input" required placeholder="e.g. Secure entry-level management consulting role in the energy sector" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2.5 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-apple-dark mb-1.5">Strategic Pillar</label>
+            <input type="text" id="goal-pillar-input" required placeholder="e.g. Career Architecture" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-dark mb-1.5">Target Horizon</label>
+            <input type="text" id="goal-horizon-input" required placeholder="e.g. Q3 2026" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-3">
+          <button type="button" onclick="closeGoalModal()" class="px-4 py-2 rounded-2xl text-xs font-medium text-apple-secondary hover:text-apple-dark hover:bg-gray-100 transition">Cancel</button>
+          <button type="submit" id="goal-submit-btn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-apple-blue hover:bg-apple-blueHover text-white shadow-sm transition">Save Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Sub-Goal (Add / Edit) -->
+  <div id="subgoal-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-apple-modal border border-apple-border transition-all transform scale-100">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 id="subgoal-modal-header" class="text-base font-semibold text-apple-dark">Add Sub-Goal</h3>
+          <p id="subgoal-modal-goal-name" class="text-xs text-apple-secondary">Intermediate milestone</p>
+        </div>
+        <button onclick="closeSubGoalModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="subgoal-form" onsubmit="handleSaveSubGoal(event)" class="space-y-4">
+        <input type="hidden" id="subgoal-parent-goal-id">
+        <input type="hidden" id="subgoal-edit-id">
+
+        <div>
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Sub-Goal / Milestone Title</label>
+          <input type="text" id="subgoal-title-input" required placeholder="e.g. Market Intelligence & Firm Outreach" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2.5 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Timeline / Cadence</label>
+          <input type="text" id="subgoal-timeline-input" placeholder="e.g. Phase 1 • 6 Weeks" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-3">
+          <button type="button" onclick="closeSubGoalModal()" class="px-4 py-2 rounded-2xl text-xs font-medium text-apple-secondary hover:text-apple-dark hover:bg-gray-100 transition">Cancel</button>
+          <button type="submit" id="subgoal-submit-btn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-apple-blue hover:bg-apple-blueHover text-white shadow-sm transition">Save Sub-Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Tactical Action / Task (Add / Edit) with DEADLINE -->
+  <div id="task-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-apple-modal border border-apple-border transition-all transform scale-100">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 id="task-modal-header" class="text-base font-semibold text-apple-dark">Add Tactical Action</h3>
+          <p id="task-modal-goal-name" class="text-xs text-apple-secondary">Specific action step</p>
+        </div>
+        <button onclick="closeTaskModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="task-form" onsubmit="handleSaveTask(event)" class="space-y-4">
+        <input type="hidden" id="task-goal-id">
+        <input type="hidden" id="task-subgoal-id">
+        <input type="hidden" id="task-edit-id">
+
+        <div>
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Action Item Title</label>
+          <input type="text" id="task-title-input" required placeholder="e.g. Map out Brussels-based & London boutique firms" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2.5 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-apple-dark mb-1.5">Priority</label>
+            <select id="task-priority-input" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+              <option value="High">High Impact</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Maintenance</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-dark mb-1.5">Est. Cadence</label>
+            <input type="text" id="task-cadence-input" placeholder="e.g. 2h deep work / Daily" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-apple-dark mb-1.5 flex items-center justify-between">
+            <span>Target Deadline</span>
+            <span class="text-[10px] text-apple-secondary font-normal">Optional date</span>
+          </label>
+          <div class="relative">
+            <input type="date" id="task-deadline-input" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-3">
+          <button type="button" onclick="closeTaskModal()" class="px-4 py-2 rounded-2xl text-xs font-medium text-apple-secondary hover:text-apple-dark hover:bg-gray-100 transition">Cancel</button>
+          <button type="submit" id="task-submit-btn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-apple-blue hover:bg-apple-blueHover text-white shadow-sm transition">Commit Action</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: Delete Confirmation Dialog -->
+  <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-apple-modal border border-apple-border text-center">
+      <div class="w-12 h-12 rounded-2xl bg-rose-50 text-apple-danger flex items-center justify-center mx-auto mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+      </div>
+      <h3 id="delete-modal-title" class="text-sm font-semibold text-apple-dark">Delete this item?</h3>
+      <p id="delete-modal-desc" class="text-xs text-apple-secondary mt-1 mb-5">This action cannot be undone.</p>
+      
+      <div class="flex items-center space-x-2">
+        <button onclick="closeDeleteModal()" class="flex-1 py-2 rounded-2xl text-xs font-medium text-apple-secondary hover:bg-gray-100 transition">Cancel</button>
+        <button id="delete-modal-confirm-btn" class="flex-1 py-2 rounded-2xl text-xs font-medium bg-apple-danger hover:bg-red-600 text-white shadow-sm transition">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: Schedule Task in Planner Slot Modal -->
+  <div id="schedule-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-apple-modal border border-apple-border">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 id="schedule-modal-header" class="text-base font-semibold text-apple-dark">Schedule Time Block</h3>
+          <p id="schedule-modal-subtitle" class="text-xs text-apple-secondary">Assign tactical action to timeline</p>
+        </div>
+        <button onclick="closeScheduleModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="schedule-form" onsubmit="handleConfirmSchedule(event)" class="space-y-4">
+        <input type="hidden" id="schedule-task-goal-id">
+        <input type="hidden" id="schedule-task-subgoal-id">
+        <input type="hidden" id="schedule-task-id">
+
+        <div>
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Action Item</label>
+          <p id="schedule-task-title-display" class="text-xs font-semibold text-apple-dark bg-apple-subtle border border-apple-border rounded-2xl p-3"></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-apple-dark mb-1.5">Start Hour</label>
+            <select id="schedule-slot-select" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+              <!-- Dynamically populated 06:00 to 22:00 -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-apple-dark mb-1.5">Duration</label>
+            <select id="schedule-duration-select" class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+              <option value="30">30 minutes</option>
+              <option value="60" selected>1 hour</option>
+              <option value="90">1 hour 30 mins</option>
+              <option value="120">2 hours</option>
+              <option value="180">3 hours</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-apple-dark mb-1.5">Date</label>
+          <input type="date" id="schedule-date-input" required class="w-full bg-apple-subtle border border-apple-border rounded-2xl px-3.5 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+        </div>
+
+        <div class="pt-2 flex items-center justify-between">
+          <button type="button" id="schedule-unschedule-btn" onclick="handleUnscheduleCurrent()" class="text-xs font-medium text-rose-600 hover:underline hidden">
+            Remove from Schedule
+          </button>
+          <div class="flex items-center space-x-2 ml-auto">
+            <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 rounded-2xl text-xs font-medium text-apple-secondary hover:text-apple-dark hover:bg-gray-100 transition">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-2xl text-xs font-medium bg-apple-blue hover:bg-apple-blueHover text-white shadow-sm transition">Lock in Block</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 bg-apple-dark text-white px-4 py-2.5 rounded-2xl text-xs shadow-lg flex items-center space-x-2">
+    <span id="toast-message">Action committed</span>
+  </div>
+
+  <script>
+    // Initial Seed Data: 3-tier hierarchy (Strategic Goal -> Sub-goals -> Tasks with Deadlines)
+    const INITIAL_GOALS = [
+      {
+        id: 'goal-1',
+        title: 'Secure entry-level management consulting role in the energy sector',
+        pillar: 'Career Architecture',
+        horizon: 'Q3 2026',
+        collapsed: false,
+        subGoals: [
+          {
+            id: 'sg-1-1',
+            title: 'Market Intelligence & Firm Outreach',
+            timeline: 'Phase 1 • 6 Weeks',
+            collapsed: false,
+            tasks: [
+              { id: 't-1-1-1', title: 'Map out Brussels-based & London boutique firms', priority: 'High', cadence: '2h deep work', deadline: '2026-11-05', completed: true, scheduledDate: '2026-11-05', scheduledSlot: '09:00', durationMinutes: 120 },
+              { id: 't-1-1-2', title: 'Conduct 3 informational interviews with grid transformation analysts', priority: 'Medium', cadence: 'Bi-weekly', deadline: '2026-11-20', completed: false, scheduledDate: '2026-11-20', scheduledSlot: '14:00', durationMinutes: 60 }
+            ]
+          },
+          {
+            id: 'sg-1-2',
+            title: 'Case Preparation & Portfolio Hardening',
+            timeline: 'Phase 2 • Ongoing',
+            collapsed: false,
+            tasks: [
+              { id: 't-1-2-1', title: 'Update quantitative modeling portfolio with grid storage case', priority: 'High', cadence: 'Weekly sprint', deadline: '2026-12-01', completed: false, scheduledDate: '2026-11-05', scheduledSlot: '11:00', durationMinutes: 60 },
+              { id: 't-1-2-2', title: 'Master 10 timed market-sizing drills on hydrogen deployment', priority: 'Medium', cadence: '30m daily', deadline: '2026-12-15', completed: false, scheduledDate: '2026-11-05', scheduledSlot: '16:00', durationMinutes: 60 }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'goal-2',
+        title: 'Launch MVP for climate risk analytics micro-SaaS',
+        pillar: 'Venture & Product',
+        horizon: 'Q4 2026',
+        collapsed: false,
+        subGoals: [
+          {
+            id: 'sg-2-1',
+            title: 'Core Engine & API Infrastructure',
+            timeline: 'Sprint 1',
+            collapsed: false,
+            tasks: [
+              { id: 't-2-1-1', title: 'Synthesize Copernicus climate data ingestion API pipeline', priority: 'High', cadence: '4h sprint', deadline: '2026-10-30', completed: true },
+              { id: 't-2-1-2', title: 'Set up real-time vector cache on serverless cluster', priority: 'High', cadence: 'Done', deadline: '2026-11-08', completed: true }
+            ]
+          },
+          {
+            id: 'sg-2-2',
+            title: 'Design & Customer Validation',
+            timeline: 'Sprint 2',
+            collapsed: false,
+            tasks: [
+              { id: 't-2-2-1', title: 'Design minimalist decision-tree reporting dashboard in Figma', priority: 'High', cadence: 'Done', deadline: '2026-11-14', completed: true },
+              { id: 't-2-2-2', title: 'Interview 5 ESG supply chain managers on pain points', priority: 'Medium', cadence: 'In progress', deadline: '2026-11-25', completed: false }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'goal-3',
+        title: 'Attain B2 professional proficiency in business French',
+        pillar: 'Human Capital',
+        horizon: 'Q2 2027',
+        collapsed: false,
+        subGoals: [
+          {
+            id: 'sg-3-1',
+            title: 'Grammar & Professional Vocabulary Foundation',
+            timeline: 'Month 1-3',
+            collapsed: false,
+            tasks: [
+              { id: 't-3-1-1', title: 'Complete 30-day grammar sprint focusing on subjonctif & idioms', priority: 'High', cadence: '20m daily', deadline: '2026-11-10', completed: true },
+              { id: 't-3-1-2', title: 'Schedule bi-weekly conversation sessions on energy policy', priority: 'Medium', cadence: 'Weekly', deadline: '2026-12-05', completed: false }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // Reactive State
+    let goals = [];
+    let currentView = 'tree'; // 'tree' | 'calendar' | 'planner'
+    let calCurrentMonth = 10; // 0-indexed (10 = November)
+    let calCurrentYear = 2026;
+    let selectedCalendarDateStr = '2026-11-05';
+    let plannerActiveDateStr = '2026-11-05';
+
+    // Timeline hours: 06:00 to 22:00
+    const TIMELINE_HOURS = [
+      '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
+      '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00',
+      '20:00', '21:00', '22:00'
+    ];
+
+    // Helper: HTML escape
+    function escapeHtml(string) {
+      if (!string) return '';
+      return String(string)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Helper: Format date string YYYY-MM-DD -> "Nov 5, 2026" or "Nov 5"
+    function formatDeadline(dateStr) {
+      if (!dateStr) return '';
+      try {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+          const year = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1;
+          const day = parseInt(parts[2], 10);
+          const date = new Date(year, month, day);
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        return dateStr;
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    // Helper: Extract all tasks in flat list with parent info
+    function getAllTasksWithContext() {
+      const list = [];
+      goals.forEach(goal => {
+        (goal.subGoals || []).forEach(sg => {
+          (sg.tasks || []).forEach(task => {
+            list.push({
+              goalId: goal.id,
+              goalTitle: goal.title,
+              pillar: goal.pillar,
+              subGoalId: sg.id,
+              subGoalTitle: sg.title,
+              ...task
+            });
+          });
+        });
+      });
+      return list;
+    }
+
+    // View Switcher logic (Tree, Calendar, Planner)
+    function switchView(viewName) {
+      currentView = viewName;
+      const treeSection = document.getElementById('view-tree');
+      const calSection = document.getElementById('view-calendar');
+      const plannerSection = document.getElementById('view-planner');
+
+      const navBtnTree = document.getElementById('nav-btn-tree');
+      const navBtnCal = document.getElementById('nav-btn-calendar');
+      const navBtnPlan = document.getElementById('nav-btn-planner');
+
+      // Hide all views first
+      treeSection.classList.add('hidden');
+      calSection.classList.add('hidden');
+      plannerSection.classList.add('hidden');
+
+      // Reset button styles to inactive
+      const inactiveBtnClass = 'flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-apple-secondary hover:text-apple-dark transition';
+      const activeBtnClass = 'flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white shadow-xs text-apple-dark font-semibold transition';
+
+      navBtnTree.className = inactiveBtnClass;
+      navBtnCal.className = inactiveBtnClass;
+      navBtnPlan.className = inactiveBtnClass;
+
+      if (viewName === 'calendar') {
+        calSection.classList.remove('hidden');
+        navBtnCal.className = activeBtnClass;
+        renderCalendar();
+      } else if (viewName === 'planner') {
+        plannerSection.classList.remove('hidden');
+        navBtnPlan.className = activeBtnClass;
+        renderPlanner();
+      } else {
+        treeSection.classList.remove('hidden');
+        navBtnTree.className = activeBtnClass;
+        renderTree();
+      }
+    }
+
+    // Direct jump from Calendar Day Inspector into Planner
+    function goToPlannerForDay(dateStr) {
+      if (dateStr) {
+        plannerActiveDateStr = dateStr;
+      }
+      switchView('planner');
+    }
+
+    // Planner Navigation Functions
+    function plannerPrevDay() {
+      try {
+        const parts = plannerActiveDateStr.split('-');
+        const date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        date.setDate(date.getDate() - 1);
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        plannerActiveDateStr = `${y}-${m}-${d}`;
+        renderPlanner();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function plannerNextDay() {
+      try {
+        const parts = plannerActiveDateStr.split('-');
+        const date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        date.setDate(date.getDate() + 1);
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        plannerActiveDateStr = `${y}-${m}-${d}`;
+        renderPlanner();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function plannerToday() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      plannerActiveDateStr = `${y}-${m}-${d}`;
+      renderPlanner();
+    }
+
+    function plannerSelectDate(dateStr) {
+      if (!dateStr) return;
+      plannerActiveDateStr = dateStr;
+      renderPlanner();
+    }
+
+    // Calendar Navigation Functions
+    function calPrevMonth() {
+      calCurrentMonth--;
+      if (calCurrentMonth < 0) {
+        calCurrentMonth = 11;
+        calCurrentYear--;
+      }
+      renderCalendar();
+    }
+
+    function calNextMonth() {
+      calCurrentMonth++;
+      if (calCurrentMonth > 11) {
+        calCurrentMonth = 0;
+        calCurrentYear++;
+      }
+      renderCalendar();
+    }
+
+    function calToday() {
+      const now = new Date();
+      calCurrentMonth = now.getMonth();
+      calCurrentYear = now.getFullYear();
+      const monthStr = String(calCurrentMonth + 1).padStart(2, '0');
+      const dayStr = String(now.getDate()).padStart(2, '0');
+      selectedCalendarDateStr = `${calCurrentYear}-${monthStr}-${dayStr}`;
+      renderCalendar();
+    }
+
+    function selectCalendarDate(dateStr) {
+      selectedCalendarDateStr = dateStr;
+      renderCalendar();
+    }
+
+    // Helper: Determine deadline urgency badge styling
+    function getDeadlineToBadge(deadlineStr, completed) {
+      if (!deadlineStr || completed) {
+        return 'bg-gray-100/80 text-apple-secondary border-gray-200/80';
+      }
+      try {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const parts = deadlineStr.split('-');
+        if (parts.length === 3) {
+          const target = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+          const diffDays = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+          if (diffDays < 0) {
+            // Overdue
+            return 'bg-rose-50 text-rose-600 border-rose-200 font-medium';
+          } else if (diffDays <= 3) {
+            // Due within 3 days
+            return 'bg-amber-50 text-amber-700 border-amber-200 font-medium';
+          }
+        }
+      } catch (e) {}
+      return 'bg-blue-50/70 text-apple-blue border-blue-100';
+    }
+
+    function init() {
+      try {
+        const stored = localStorage.getItem('strata_goals_v3');
+        if (stored) {
+          goals = JSON.parse(stored);
+          // Migrate any previous version data missing subGoals
+          let needsMigration = false;
+          goals.forEach(g => {
+            if (!g.subGoals) {
+              g.subGoals = [];
+              if (g.tasks && Array.isArray(g.tasks) && g.tasks.length > 0) {
+                g.subGoals.push({
+                  id: 'sg-' + Date.now(),
+                  title: 'Core Milestone',
+                  timeline: 'Current Sprint',
+                  collapsed: false,
+                  tasks: g.tasks
+                });
+                delete g.tasks;
+              }
+              needsMigration = true;
+            }
+          });
+          if (needsMigration) saveState();
+        } else {
+          goals = JSON.parse(JSON.stringify(INITIAL_GOALS));
+          saveState();
+        }
+      } catch (e) {
+        goals = JSON.parse(JSON.stringify(INITIAL_GOALS));
+      }
+      render();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem('strata_goals_v3', JSON.stringify(goals));
+      } catch (e) {
+        console.error('Failed to save to localStorage:', e);
+      }
+    }
+
+    function resetToSampleData() {
+      goals = JSON.parse(JSON.stringify(INITIAL_GOALS));
+      saveState();
+      render();
+      showToast('Sample tree structure restored');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const msgElem = document.getElementById('toast-message');
+      msgElem.innerText = msg;
+      toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    // Modal Handlers: Strategic Goal
+    function openGoalModal(goalId = null) {
+      document.getElementById('goal-form').reset();
+      const editIdInput = document.getElementById('goal-edit-id');
+      const modalHeader = document.getElementById('goal-modal-header');
+      const submitBtn = document.getElementById('goal-submit-btn');
+
+      if (goalId) {
+        const g = goals.find(item => item.id === goalId);
+        if (!g) return;
+        editIdInput.value = g.id;
+        document.getElementById('goal-title-input').value = g.title;
+        document.getElementById('goal-pillar-input').value = g.pillar || '';
+        document.getElementById('goal-horizon-input').value = g.horizon || '';
+        modalHeader.innerText = 'Edit Strategic Goal';
+        submitBtn.innerText = 'Update Goal';
+      } else {
+        editIdInput.value = '';
+        modalHeader.innerText = 'Add Strategic Goal';
+        submitBtn.innerText = 'Save Goal';
+      }
+
+      document.getElementById('goal-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('goal-title-input').focus(), 50);
+    }
+
+    function closeGoalModal() {
+      document.getElementById('goal-modal').classList.add('hidden');
+    }
+
+    function handleSaveGoal(e) {
+      e.preventDefault();
+      const editId = document.getElementById('goal-edit-id').value;
+      const title = document.getElementById('goal-title-input').value.trim();
+      const pillar = document.getElementById('goal-pillar-input').value.trim();
+      const horizon = document.getElementById('goal-horizon-input').value.trim();
+
+      if (!title) return;
+
+      if (editId) {
+        const g = goals.find(item => item.id === editId);
+        if (g) {
+          g.title = title;
+          g.pillar = pillar;
+          g.horizon = horizon;
+          showToast('Strategic goal updated');
+        }
+      } else {
+        goals.push({
+          id: 'goal-' + Date.now(),
+          title,
+          pillar: pillar || 'Core Strategic Pillar',
+          horizon: horizon || 'Upcoming',
+          collapsed: false,
+          subGoals: []
+        });
+        showToast('Strategic goal anchored');
+      }
+
+      saveState();
+      render();
+      closeGoalModal();
+    }
+
+    // Modal Handlers: Sub-Goal
+    function openSubGoalModal(parentGoalId, subGoalId = null) {
+      const parentGoal = goals.find(g => g.id === parentGoalId);
+      if (!parentGoal) return;
+
+      document.getElementById('subgoal-form').reset();
+      document.getElementById('subgoal-parent-goal-id').value = parentGoalId;
+      const editIdInput = document.getElementById('subgoal-edit-id');
+      const modalHeader = document.getElementById('subgoal-modal-header');
+      const submitBtn = document.getElementById('subgoal-submit-btn');
+
+      if (subGoalId) {
+        const sg = (parentGoal.subGoals || []).find(s => s.id === subGoalId);
+        if (!sg) return;
+        editIdInput.value = sg.id;
+        document.getElementById('subgoal-title-input').value = sg.title;
+        document.getElementById('subgoal-timeline-input').value = sg.timeline || '';
+        modalHeader.innerText = 'Edit Sub-Goal';
+        submitBtn.innerText = 'Update Sub-Goal';
+      } else {
+        editIdInput.value = '';
+        modalHeader.innerText = 'Add Sub-Goal';
+        submitBtn.innerText = 'Save Sub-Goal';
+      }
+
+      document.getElementById('subgoal-modal-goal-name').innerText = `Parent: ${parentGoal.title}`;
+      document.getElementById('subgoal-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('subgoal-title-input').focus(), 50);
+    }
+
+    function closeSubGoalModal() {
+      document.getElementById('subgoal-modal').classList.add('hidden');
+    }
+
+    function handleSaveSubGoal(e) {
+      e.preventDefault();
+      const parentGoalId = document.getElementById('subgoal-parent-goal-id').value;
+      const editSubGoalId = document.getElementById('subgoal-edit-id').value;
+      const title = document.getElementById('subgoal-title-input').value.trim();
+      const timeline = document.getElementById('subgoal-timeline-input').value.trim() || 'Sprint';
+
+      if (!title) return;
+
+      const parentGoal = goals.find(g => g.id === parentGoalId);
+      if (parentGoal) {
+        if (!parentGoal.subGoals) parentGoal.subGoals = [];
+
+        if (editSubGoalId) {
+          const sg = parentGoal.subGoals.find(s => s.id === editSubGoalId);
+          if (sg) {
+            sg.title = title;
+            sg.timeline = timeline;
+            showToast('Sub-goal updated');
+          }
+        } else {
+          parentGoal.subGoals.push({
+            id: 'sg-' + Date.now(),
+            title,
+            timeline,
+            collapsed: false,
+            tasks: []
+          });
+          parentGoal.collapsed = false;
+          showToast('Sub-goal milestone added');
+        }
+        saveState();
+        render();
+        closeSubGoalModal();
+      }
+    }
+
+    // Modal Handlers: Tactical Action / Task with Deadline
+    function openTaskModal(goalId, subGoalId, taskId = null) {
+      const goal = goals.find(g => g.id === goalId);
+      if (!goal) return;
+      if (!goal.subGoals) goal.subGoals = [];
+      const sg = goal.subGoals.find(s => s.id === subGoalId);
+      if (!sg) return;
+
+      const form = document.getElementById('task-form');
+      if (form) form.reset();
+
+      document.getElementById('task-goal-id').value = goalId;
+      document.getElementById('task-subgoal-id').value = subGoalId;
+      const editIdInput = document.getElementById('task-edit-id');
+      const modalHeader = document.getElementById('task-modal-header');
+      const submitBtn = document.getElementById('task-submit-btn');
+
+      if (taskId) {
+        const task = (sg.tasks || []).find(t => t.id === taskId);
+        if (!task) return;
+        editIdInput.value = task.id;
+        document.getElementById('task-title-input').value = task.title || '';
+        document.getElementById('task-priority-input').value = task.priority || 'Medium';
+        document.getElementById('task-cadence-input').value = task.cadence || '';
+        document.getElementById('task-deadline-input').value = task.deadline || '';
+        modalHeader.innerText = 'Edit Tactical Action';
+        submitBtn.innerText = 'Update Action';
+      } else {
+        editIdInput.value = '';
+        document.getElementById('task-title-input').value = '';
+        document.getElementById('task-priority-input').value = 'Medium';
+        document.getElementById('task-cadence-input').value = '';
+        document.getElementById('task-deadline-input').value = '';
+        modalHeader.innerText = 'Add Tactical Action';
+        submitBtn.innerText = 'Commit Action';
+      }
+
+      document.getElementById('task-modal-goal-name').innerText = `Sub-Goal: ${sg.title}`;
+      document.getElementById('task-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('task-title-input').focus(), 50);
+    }
+
+    function closeTaskModal() {
+      document.getElementById('task-modal').classList.add('hidden');
+    }
+
+    function handleSaveTask(e) {
+      e.preventDefault();
+      const goalId = document.getElementById('task-goal-id').value;
+      const subGoalId = document.getElementById('task-subgoal-id').value;
+      const editTaskId = document.getElementById('task-edit-id').value;
+      const title = document.getElementById('task-title-input').value.trim();
+      const priority = document.getElementById('task-priority-input').value;
+      const cadence = document.getElementById('task-cadence-input').value.trim() || 'Daily action';
+      const deadline = document.getElementById('task-deadline-input').value || '';
+
+      if (!title) return;
+
+      const goal = goals.find(g => g.id === goalId);
+      if (goal) {
+        if (!goal.subGoals) goal.subGoals = [];
+        const sg = goal.subGoals.find(s => s.id === subGoalId);
+        if (sg) {
+          if (!sg.tasks) sg.tasks = [];
+
+          if (editTaskId) {
+            const task = sg.tasks.find(t => t.id === editTaskId);
+            if (task) {
+              task.title = title;
+              task.priority = priority;
+              task.cadence = cadence;
+              task.deadline = deadline;
+              showToast('Tactical action updated');
+            }
+          } else {
+            sg.tasks.push({
+              id: 'task-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+              title,
+              priority,
+              cadence,
+              deadline,
+              completed: false
+            });
+            sg.collapsed = false;
+            showToast('Daily action committed');
+          }
+          saveState();
+          render();
+          closeTaskModal();
+        }
+      }
+    }
+
+    // Toggle Task Complete
+    function toggleTask(goalId, subGoalId, taskId) {
+      const goal = goals.find(g => g.id === goalId);
+      if (goal && goal.subGoals) {
+        const sg = goal.subGoals.find(s => s.id === subGoalId);
+        if (sg && sg.tasks) {
+          const task = sg.tasks.find(t => t.id === taskId);
+          if (task) {
+            task.completed = !task.completed;
+            saveState();
+            render();
+          }
+        }
+      }
+    }
+
+    // Collapse Toggles
+    function toggleGoalCollapse(goalId) {
+      const g = goals.find(item => item.id === goalId);
+      if (g) {
+        g.collapsed = !g.collapsed;
+        saveState();
+        render();
+      }
+    }
+
+    function toggleSubGoalCollapse(goalId, subGoalId) {
+      const g = goals.find(item => item.id === goalId);
+      if (g && g.subGoals) {
+        const sg = g.subGoals.find(s => s.id === subGoalId);
+        if (sg) {
+          sg.collapsed = !sg.collapsed;
+          saveState();
+          render();
+        }
+      }
+    }
+
+    // Delete Confirmation Flow
+    let pendingDeleteAction = null;
+
+    function promptDeleteGoal(goalId) {
+      const g = goals.find(item => item.id === goalId);
+      if (!g) return;
+      document.getElementById('delete-modal-title').innerText = 'Delete Strategic Goal?';
+      document.getElementById('delete-modal-desc').innerText = `"${g.title}" and all its sub-goals and actions will be permanently removed.`;
+      pendingDeleteAction = () => {
+        goals = goals.filter(item => item.id !== goalId);
+        showToast('Strategic goal deleted');
+      };
+      document.getElementById('delete-modal').classList.remove('hidden');
+    }
+
+    function promptDeleteSubGoal(goalId, subGoalId) {
+      const g = goals.find(item => item.id === goalId);
+      if (!g || !g.subGoals) return;
+      const sg = g.subGoals.find(s => s.id === subGoalId);
+      if (!sg) return;
+
+      document.getElementById('delete-modal-title').innerText = 'Delete Sub-Goal?';
+      document.getElementById('delete-modal-desc').innerText = `"${sg.title}" and its actions will be removed.`;
+      pendingDeleteAction = () => {
+        g.subGoals = g.subGoals.filter(s => s.id !== subGoalId);
+        showToast('Sub-goal deleted');
+      };
+      document.getElementById('delete-modal').classList.remove('hidden');
+    }
+
+    function promptDeleteTask(goalId, subGoalId, taskId) {
+      const g = goals.find(item => item.id === goalId);
+      if (!g || !g.subGoals) return;
+      const sg = g.subGoals.find(s => s.id === subGoalId);
+      if (!sg || !sg.tasks) return;
+      const task = sg.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      document.getElementById('delete-modal-title').innerText = 'Delete Action?';
+      document.getElementById('delete-modal-desc').innerText = `"${task.title}" will be removed.`;
+      pendingDeleteAction = () => {
+        sg.tasks = sg.tasks.filter(t => t.id !== taskId);
+        showToast('Action removed');
+      };
+      document.getElementById('delete-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+      pendingDeleteAction = null;
+      document.getElementById('delete-modal').classList.add('hidden');
+    }
+
+    document.getElementById('delete-modal-confirm-btn').addEventListener('click', () => {
+      if (pendingDeleteAction) {
+        pendingDeleteAction();
+        saveState();
+        render();
+      }
+      closeDeleteModal();
+    });
+
+    // ==========================================
+    // DAY PLANNER SCHEDULING LOGIC & MODAL
+    // ==========================================
+
+    function populateSlotSelectOptions(selectedSlot = '09:00') {
+      const select = document.getElementById('schedule-slot-select');
+      if (!select) return;
+      select.innerHTML = TIMELINE_HOURS.map(h => `
+        <option value="${h}" ${h === selectedSlot ? 'selected' : ''}>${h}</option>
+      `).join('');
+    }
+
+    function openScheduleModal(goalId, subGoalId, taskId, presetSlot = null) {
+      const goal = goals.find(g => g.id === goalId);
+      if (!goal || !goal.subGoals) return;
+      const sg = goal.subGoals.find(s => s.id === subGoalId);
+      if (!sg || !sg.tasks) return;
+      const task = sg.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      document.getElementById('schedule-task-goal-id').value = goalId;
+      document.getElementById('schedule-task-subgoal-id').value = subGoalId;
+      document.getElementById('schedule-task-id').value = taskId;
+
+      document.getElementById('schedule-task-title-display').innerText = task.title;
+
+      const dateInput = document.getElementById('schedule-date-input');
+      dateInput.value = task.scheduledDate || task.deadline || plannerActiveDateStr;
+
+      const slotToUse = presetSlot || task.scheduledSlot || '09:00';
+      populateSlotSelectOptions(slotToUse);
+
+      const durationSelect = document.getElementById('schedule-duration-select');
+      if (durationSelect) {
+        durationSelect.value = String(task.durationMinutes || 60);
+      }
+
+      const unscheduleBtn = document.getElementById('schedule-unschedule-btn');
+      if (unscheduleBtn) {
+        if (task.scheduledSlot) {
+          unscheduleBtn.classList.remove('hidden');
+        } else {
+          unscheduleBtn.classList.add('hidden');
+        }
+      }
+
+      document.getElementById('schedule-modal').classList.remove('hidden');
+    }
+
+    function closeScheduleModal() {
+      document.getElementById('schedule-modal').classList.add('hidden');
+    }
+
+    function handleConfirmSchedule(e) {
+      e.preventDefault();
+      const goalId = document.getElementById('schedule-task-goal-id').value;
+      const subGoalId = document.getElementById('schedule-task-subgoal-id').value;
+      const taskId = document.getElementById('schedule-task-id').value;
+      const slot = document.getElementById('schedule-slot-select').value;
+      const duration = parseInt(document.getElementById('schedule-duration-select').value, 10) || 60;
+      const date = document.getElementById('schedule-date-input').value;
+
+      const goal = goals.find(g => g.id === goalId);
+      if (goal && goal.subGoals) {
+        const sg = goal.subGoals.find(s => s.id === subGoalId);
+        if (sg && sg.tasks) {
+          const task = sg.tasks.find(t => t.id === taskId);
+          if (task) {
+            task.scheduledSlot = slot;
+            task.scheduledDate = date;
+            task.durationMinutes = duration;
+            showToast(`Scheduled for ${slot} on ${formatDeadline(date)}`);
+            saveState();
+            render();
+            closeScheduleModal();
+          }
+        }
+      }
+    }
+
+    function handleUnscheduleCurrent() {
+      const goalId = document.getElementById('schedule-task-goal-id').value;
+      const subGoalId = document.getElementById('schedule-task-subgoal-id').value;
+      const taskId = document.getElementById('schedule-task-id').value;
+
+      const goal = goals.find(g => g.id === goalId);
+      if (goal && goal.subGoals) {
+        const sg = goal.subGoals.find(s => s.id === subGoalId);
+        if (sg && sg.tasks) {
+          const task = sg.tasks.find(t => t.id === taskId);
+          if (task) {
+            delete task.scheduledSlot;
+            delete task.scheduledDate;
+            delete task.durationMinutes;
+            showToast('Removed from schedule');
+            saveState();
+            render();
+            closeScheduleModal();
+          }
+        }
+      }
+    }
+
+    function quickUnschedule(goalId, subGoalId, taskId) {
+      const goal = goals.find(g => g.id === goalId);
+      if (goal && goal.subGoals) {
+        const sg = goal.subGoals.find(s => s.id === subGoalId);
+        if (sg && sg.tasks) {
+          const task = sg.tasks.find(t => t.id === taskId);
+          if (task) {
+            delete task.scheduledSlot;
+            delete task.scheduledDate;
+            delete task.durationMinutes;
+            showToast('Time block cleared');
+            saveState();
+            render();
+          }
+        }
+      }
+    }
+
+    // ==========================================
+    // RENDER: DAY PLANNER
+    // ==========================================
+    function renderPlanner() {
+      const activeDateLabel = document.getElementById('planner-active-date-label');
+      const activeDateSub = document.getElementById('planner-active-date-sub');
+      const datePicker = document.getElementById('planner-date-picker');
+      const timelineGrid = document.getElementById('planner-timeline-grid');
+      const taskQueue = document.getElementById('planner-task-queue');
+      const unscheduledCountBadge = document.getElementById('planner-unscheduled-count');
+      const scheduledCountBadge = document.getElementById('planner-scheduled-count-badge');
+      const activeDayHint = document.getElementById('planner-active-day-hint');
+
+      if (!activeDateLabel || !timelineGrid) return;
+
+      const formattedActive = formatDeadline(plannerActiveDateStr);
+      activeDateLabel.innerText = formattedActive;
+      if (datePicker) datePicker.value = plannerActiveDateStr;
+      if (activeDayHint) activeDayHint.innerText = formattedActive;
+
+      const allTasks = getAllTasksWithContext();
+
+      // Filter tasks scheduled specifically for this day
+      const scheduledTasks = allTasks.filter(t => t.scheduledDate === plannerActiveDateStr && t.scheduledSlot);
+
+      // Tasks available to schedule (either due today or unscheduled anywhere)
+      const unscheduledTasks = allTasks.filter(t => {
+        // Not already scheduled for this active date
+        const isScheduledThisDay = t.scheduledDate === plannerActiveDateStr && t.scheduledSlot;
+        return !isScheduledThisDay;
+      });
+
+      if (scheduledCountBadge) {
+        scheduledCountBadge.innerText = `${scheduledTasks.length} time block${scheduledTasks.length === 1 ? '' : 's'}`;
+      }
+      if (unscheduledCountBadge) {
+        unscheduledCountBadge.innerText = unscheduledTasks.length;
+      }
+
+      // Group scheduled tasks by slot (e.g., '09:00': [task1, ...])
+      const slotMap = {};
+      scheduledTasks.forEach(t => {
+        if (!slotMap[t.scheduledSlot]) slotMap[t.scheduledSlot] = [];
+        slotMap[t.scheduledSlot].push(t);
+      });
+
+      // Render 06:00 to 22:00 timeline rows
+      let timelineHtml = '';
+
+      TIMELINE_HOURS.forEach(hour => {
+        const tasksInHour = slotMap[hour] || [];
+        const isOccupied = tasksInHour.length > 0;
+
+        timelineHtml += `
+          <div class="py-3 sm:py-3.5 flex flex-col sm:flex-row sm:items-start group transition ${isOccupied ? 'bg-blue-50/20' : 'hover:bg-apple-subtle/50'}">
+            <!-- Time Column -->
+            <div class="sm:w-24 flex-shrink-0 flex sm:flex-col items-center sm:items-start justify-between sm:justify-start pr-3">
+              <span class="text-xs font-bold text-apple-dark">${hour}</span>
+              <span class="text-[10px] text-apple-tertiary sm:mt-0.5">${hour < '12:00' ? 'Morning' : hour < '17:00' ? 'Afternoon' : 'Evening'}</span>
+            </div>
+
+            <!-- Block Content Column -->
+            <div class="flex-1 min-w-0 mt-2 sm:mt-0 pl-1">
+              ${tasksInHour.length === 0 ? `
+                <div class="flex items-center justify-between border border-dashed border-apple-border/70 rounded-2xl px-3 py-2 text-apple-tertiary hover:border-apple-blue/50 hover:bg-white transition group/slot">
+                  <span class="text-xs">No strategic action scheduled</span>
+                  <div class="opacity-0 group-hover/slot:opacity-100 flex items-center space-x-1.5 transition-opacity">
+                    ${unscheduledTasks.length > 0 ? `
+                      <button onclick="openScheduleModal('${unscheduledTasks[0].goalId}', '${unscheduledTasks[0].subGoalId}', '${unscheduledTasks[0].id}', '${hour}')" class="text-[11px] font-semibold text-apple-blue hover:underline px-2 py-0.5 rounded-lg bg-blue-50/70">
+                        + Assign Task
+                      </button>
+                    ` : `
+                      <span class="text-[10px] text-apple-secondary italic">Queue is empty</span>
+                    `}
+                  </div>
+                </div>
+              ` : `
+                <div class="space-y-2">
+                  ${tasksInHour.map(task => {
+                    const dur = task.durationMinutes || 60;
+                    const durLabel = dur >= 60 ? `${dur / 60}h` : `${dur}m`;
+
+                    return `
+                      <div class="bg-white border ${task.completed ? 'border-apple-border bg-gray-50/70' : 'border-apple-borderStrong shadow-xs'} rounded-2xl p-3 sm:p-3.5 transition-all">
+                        <div class="flex items-start justify-between gap-2">
+                          
+                          <!-- Checkbox + Info -->
+                          <div class="flex items-start space-x-3 flex-1 min-w-0">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.goalId}', '${task.subGoalId}', '${task.id}')" class="apple-checkbox mt-0.5" aria-label="Mark task done">
+                            
+                            <div class="flex-1 min-w-0">
+                              <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                <span class="text-[9px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.2 rounded-full">
+                                  ${hour} • ${durLabel} block
+                                </span>
+                                <span class="text-[9px] px-2 py-0.2 rounded-full font-medium ${
+                                  task.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                                  task.priority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                                  'bg-gray-100 text-gray-600'
+                                }">
+                                  ${escapeHtml(task.priority)}
+                                </span>
+                              </div>
+
+                              <h4 class="text-xs sm:text-sm font-semibold text-apple-dark ${task.completed ? 'line-through text-apple-tertiary' : ''}">
+                                ${escapeHtml(task.title)}
+                              </h4>
+
+                              <p class="text-[10px] text-apple-secondary truncate mt-0.5">
+                                <span class="font-medium text-apple-dark">${escapeHtml(task.subGoalTitle)}</span> • ${escapeHtml(task.goalTitle)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <!-- Actions: Change time / Unschedule -->
+                          <div class="flex items-center space-x-1 flex-shrink-0">
+                            <button onclick="openScheduleModal('${task.goalId}', '${task.subGoalId}', '${task.id}', '${hour}')" title="Adjust time block" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </button>
+                            <button onclick="quickUnschedule('${task.goalId}', '${task.subGoalId}', '${task.id}')" title="Remove from timeline" class="p-1.5 text-apple-secondary hover:text-rose-600 rounded-xl hover:bg-rose-50 transition">
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                          </div>
+
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      });
+
+      timelineGrid.innerHTML = timelineHtml;
+
+      // Render Unscheduled Tasks Queue in sidebar
+      if (unscheduledTasks.length === 0) {
+        taskQueue.innerHTML = `
+          <div class="p-6 text-center bg-apple-subtle border border-dashed border-apple-border rounded-2xl">
+            <svg class="w-6 h-6 text-apple-tertiary mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <p class="text-xs font-medium text-apple-secondary">All tactical actions are scheduled!</p>
+          </div>
+        `;
+      } else {
+        taskQueue.innerHTML = unscheduledTasks.map(task => {
+          const isDueActiveDate = task.deadline === plannerActiveDateStr;
+
+          return `
+            <div class="group bg-apple-subtle hover:bg-white border ${isDueActiveDate ? 'border-indigo-200 bg-indigo-50/20' : 'border-apple-border'} hover:border-apple-borderStrong rounded-2xl p-3 transition shadow-xs">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center space-x-1.5 mb-1">
+                    ${isDueActiveDate ? `
+                      <span class="text-[9px] font-semibold px-2 py-0.2 rounded-full bg-indigo-100 text-indigo-700">Due Today</span>
+                    ` : ''}
+                    <span class="text-[9px] px-1.5 py-0.2 rounded-full font-medium ${
+                      task.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                      'bg-gray-100 text-gray-600'
+                    }">
+                      ${escapeHtml(task.priority)}
+                    </span>
+                    ${task.deadline ? `
+                      <span class="text-[9px] text-apple-secondary">
+                        ${formatDeadline(task.deadline)}
+                      </span>
+                    ` : `
+                      <span class="text-[9px] text-apple-tertiary italic">Undated</span>
+                    `}
+                  </div>
+
+                  <p class="text-xs font-semibold text-apple-dark leading-snug truncate ${task.completed ? 'line-through text-apple-tertiary' : ''}">
+                    ${escapeHtml(task.title)}
+                  </p>
+                  <p class="text-[10px] text-apple-secondary truncate mt-0.5">
+                    ${escapeHtml(task.subGoalTitle)}
+                  </p>
+                </div>
+
+                <button onclick="openScheduleModal('${task.goalId}', '${task.subGoalId}', '${task.id}', '09:00')" class="px-2.5 py-1 rounded-xl text-[11px] font-semibold text-white bg-apple-blue hover:bg-apple-blueHover shadow-xs transition flex-shrink-0">
+                  Schedule
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Calendar View Renderer
+    function renderCalendar() {
+      const monthYearTitle = document.getElementById('calendar-month-year');
+      const monthSummarySubtitle = document.getElementById('calendar-summary-subtitle');
+      const calendarGrid = document.getElementById('calendar-grid');
+
+      const dateObj = new Date(calCurrentYear, calCurrentMonth, 1);
+      const monthName = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      if (monthYearTitle) monthYearTitle.innerText = monthName;
+
+      // Group tasks by deadline date (YYYY-MM-DD)
+      const allTasks = getAllTasksWithContext();
+      const tasksByDate = {};
+      const undatedTasks = [];
+      let totalTasksInMonth = 0;
+
+      allTasks.forEach(t => {
+        if (t.deadline) {
+          if (!tasksByDate[t.deadline]) tasksByDate[t.deadline] = [];
+          tasksByDate[t.deadline].push(t);
+
+          // Check if this deadline is in the currently viewed month
+          const [yr, mo] = t.deadline.split('-').map(Number);
+          if (yr === calCurrentYear && mo === calCurrentMonth + 1) {
+            totalTasksInMonth++;
+          }
+        } else {
+          undatedTasks.push(t);
+        }
+      });
+
+      if (monthSummarySubtitle) {
+        monthSummarySubtitle.innerText = `${totalTasksInMonth} action${totalTasksInMonth === 1 ? '' : 's'} scheduled for this month`;
+      }
+
+      // Compute calendar days
+      const daysInMonth = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
+      const firstDayIndex = new Date(calCurrentYear, calCurrentMonth, 1).getDay(); // 0 = Sunday
+      const prevMonthDays = new Date(calCurrentYear, calCurrentMonth, 0).getDate();
+
+      let gridHtml = '';
+
+      // Leading days from previous month
+      for (let i = firstDayIndex - 1; i >= 0; i--) {
+        const d = prevMonthDays - i;
+        gridHtml += `
+          <div class="min-h-[85px] sm:min-h-[105px] p-1.5 sm:p-2 bg-gray-50/60 rounded-2xl border border-transparent opacity-40 text-apple-secondary select-none">
+            <span class="text-xs font-medium">${d}</span>
+          </div>
+        `;
+      }
+
+      // Current Month Days
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dayFormatted = String(d).padStart(2, '0');
+        const monthFormatted = String(calCurrentMonth + 1).padStart(2, '0');
+        const fullDateStr = `${calCurrentYear}-${monthFormatted}-${dayFormatted}`;
+        const dayTasks = tasksByDate[fullDateStr] || [];
+        const isSelected = selectedCalendarDateStr === fullDateStr;
+        const isToday = todayStr === fullDateStr;
+
+        const completedCount = dayTasks.filter(t => t.completed).length;
+
+        gridHtml += `
+          <div onclick="selectCalendarDate('${fullDateStr}')" class="min-h-[85px] sm:min-h-[105px] p-1.5 sm:p-2 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+            isSelected 
+              ? 'bg-blue-50/50 border-apple-blue shadow-xs ring-2 ring-apple-blue/20' 
+              : isToday 
+                ? 'bg-apple-subtle border-apple-borderStrong shadow-xs hover:border-apple-blue' 
+                : 'bg-white border-apple-border hover:border-gray-300'
+          }">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold ${isToday ? 'w-5 h-5 rounded-full bg-apple-dark text-white flex items-center justify-center text-[10px]' : isSelected ? 'text-apple-blue font-bold' : 'text-apple-dark'}">
+                ${d}
+              </span>
+              ${dayTasks.length > 0 ? `
+                <span class="text-[9px] font-semibold px-1.5 py-0.2 rounded-full ${completedCount === dayTasks.length ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-apple-secondary'}">
+                  ${completedCount}/${dayTasks.length}
+                </span>
+              ` : ''}
+            </div>
+
+            <!-- Task Chips inside Day Cell -->
+            <div class="space-y-1 overflow-hidden flex-1">
+              ${dayTasks.slice(0, 2).map(t => `
+                <div class="truncate text-[10px] px-1.5 py-0.5 rounded-lg border font-medium flex items-center space-x-1 ${
+                  t.completed 
+                    ? 'bg-gray-100 text-apple-secondary line-through border-gray-200' 
+                    : t.priority === 'High' 
+                      ? 'bg-rose-50 text-rose-700 border-rose-100' 
+                      : 'bg-blue-50/80 text-apple-blue border-blue-100'
+                }" title="${escapeHtml(t.title)}">
+                  <span class="w-1.5 h-1.5 rounded-full ${t.priority === 'High' ? 'bg-rose-500' : 'bg-apple-blue'} flex-shrink-0"></span>
+                  <span class="truncate">${escapeHtml(t.title)}</span>
+                </div>
+              `).join('')}
+              ${dayTasks.length > 2 ? `
+                <div class="text-[9px] font-medium text-apple-secondary pl-1">
+                  +${dayTasks.length - 2} more
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // Trailing empty days to complete the calendar grid
+      const totalCells = firstDayIndex + daysInMonth;
+      const trailingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      for (let i = 1; i <= trailingCells; i++) {
+        gridHtml += `
+          <div class="min-h-[85px] sm:min-h-[105px] p-1.5 sm:p-2 bg-gray-50/60 rounded-2xl border border-transparent opacity-40 text-apple-secondary select-none">
+            <span class="text-xs font-medium">${i}</span>
+          </div>
+        `;
+      }
+
+      calendarGrid.innerHTML = gridHtml;
+
+      // Render Selected Day Agenda in right column
+      renderSelectedDayAgenda(selectedCalendarDateStr, tasksByDate[selectedCalendarDateStr] || []);
+
+      // Render Undated Tasks
+      renderUndatedTasksList(undatedTasks);
+    }
+
+    function renderSelectedDayAgenda(dateStr, tasks) {
+      const titleEl = document.getElementById('selected-day-title');
+      const countBadge = document.getElementById('selected-day-count-badge');
+      const listContainer = document.getElementById('selected-day-tasks-list');
+
+      if (!titleEl || !countBadge || !listContainer) return;
+
+      const formatted = formatDeadline(dateStr);
+      titleEl.innerText = formatted || 'Selected Date';
+      countBadge.innerText = `${tasks.length} action${tasks.length === 1 ? '' : 's'}`;
+
+      if (tasks.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-6 text-center bg-apple-subtle border border-dashed border-apple-border rounded-2xl">
+            <svg class="w-6 h-6 text-apple-tertiary mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <p class="text-xs font-medium text-apple-secondary">No deadlines scheduled for this day.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = tasks.map(task => `
+        <div class="group bg-apple-subtle/80 hover:bg-white border border-apple-border hover:border-apple-borderStrong rounded-2xl p-3 transition shadow-xs">
+          <div class="flex items-start space-x-2.5">
+            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.goalId}', '${task.subGoalId}', '${task.id}')" class="apple-checkbox mt-0.5" aria-label="Mark task done">
+
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-medium text-apple-dark leading-snug ${task.completed ? 'line-through text-apple-tertiary' : ''}">
+                ${escapeHtml(task.title)}
+              </p>
+
+              <!-- Parent context -->
+              <p class="text-[10px] text-apple-secondary truncate mt-0.5">
+                <span class="font-medium text-apple-dark">${escapeHtml(task.subGoalTitle)}</span> • ${escapeHtml(task.goalTitle)}
+              </p>
+
+              <div class="flex items-center space-x-2 mt-2">
+                <span class="text-[9px] px-2 py-0.5 rounded-full font-medium ${
+                  task.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                  task.priority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                  'bg-gray-100 text-gray-600'
+                }">
+                  ${escapeHtml(task.priority)}
+                </span>
+                ${task.cadence ? `
+                  <span class="text-[9px] text-apple-secondary">
+                    ${escapeHtml(task.cadence)}
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Edit/Delete Action Buttons -->
+            <div class="opacity-0 group-hover:opacity-100 flex items-center space-x-1 transition-opacity">
+              <button onclick="openTaskModal('${task.goalId}', '${task.subGoalId}', '${task.id}')" title="Edit Action" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              </button>
+              <button onclick="promptDeleteTask('${task.goalId}', '${task.subGoalId}', '${task.id}')" title="Delete Action" class="p-1 text-apple-secondary hover:text-apple-danger rounded-lg hover:bg-rose-50 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderUndatedTasksList(tasks) {
+      const countEl = document.getElementById('undated-tasks-count');
+      const listEl = document.getElementById('undated-tasks-list');
+      if (!countEl || !listEl) return;
+
+      countEl.innerText = tasks.length;
+      if (tasks.length === 0) {
+        listEl.innerHTML = `<p class="text-[11px] text-apple-secondary italic">All tasks have designated deadlines.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = tasks.map(task => `
+        <div class="flex items-center justify-between p-2 rounded-xl bg-apple-subtle border border-apple-border text-xs">
+          <div class="flex-1 min-w-0 mr-2">
+            <p class="text-xs font-medium text-apple-dark truncate ${task.completed ? 'line-through text-apple-tertiary' : ''}">${escapeHtml(task.title)}</p>
+            <p class="text-[9px] text-apple-secondary truncate">${escapeHtml(task.subGoalTitle)}</p>
+          </div>
+          <button onclick="openTaskModal('${task.goalId}', '${task.subGoalId}', '${task.id}')" class="text-[10px] font-medium text-apple-blue hover:underline flex-shrink-0">
+            Set Date
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // Main Renderer
+    function render() {
+      renderTree();
+      if (currentView === 'calendar') {
+        renderCalendar();
+      } else if (currentView === 'planner') {
+        renderPlanner();
+      }
+    }
+
+    function renderTree() {
+      const container = document.getElementById('tree-container');
+
+      // Aggregate global statistics
+      let totalTasksCount = 0;
+      let completedTasksCount = 0;
+      let totalSubGoalsCount = 0;
+
+      goals.forEach(g => {
+        (g.subGoals || []).forEach(sg => {
+          totalSubGoalsCount++;
+          (sg.tasks || []).forEach(t => {
+            totalTasksCount++;
+            if (t.completed) completedTasksCount++;
+          });
+        });
+      });
+
+      const overallPct = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
+      
+      const overallPctEl = document.getElementById('overall-percentage');
+      if (overallPctEl) overallPctEl.innerText = `${overallPct}%`;
+      
+      const overallBarEl = document.getElementById('overall-progress-bar');
+      if (overallBarEl) overallBarEl.style.width = `${overallPct}%`;
+
+      const statsPillEl = document.getElementById('stats-pill');
+      if (statsPillEl) {
+        statsPillEl.innerHTML = `
+          <span>${goals.length} Goals</span>
+          <span class="text-gray-300">•</span>
+          <span>${totalSubGoalsCount} Sub-goals</span>
+          <span class="text-gray-300">•</span>
+          <span class="text-apple-dark font-semibold">${completedTasksCount}/${totalTasksCount} Actions</span>
+        `;
+      }
+
+      if (goals.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl p-12 text-center max-w-lg mx-auto border border-apple-border shadow-apple">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-apple-blue flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            </div>
+            <h3 class="text-sm font-semibold text-apple-dark">No Strategic Goals Defined</h3>
+            <p class="text-xs text-apple-secondary mt-1 mb-6">Create your first strategic horizon goal to branch into milestones and daily execution.</p>
+            <button onclick="openGoalModal()" class="px-4 py-2 bg-apple-blue text-white rounded-2xl text-xs font-medium shadow-sm hover:bg-apple-blueHover transition">
+              Create Strategic Goal
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      // Render Goals -> Sub-Goals -> Tasks
+      container.innerHTML = goals.map((goal, gIndex) => {
+        const subGoals = goal.subGoals || [];
+        let goalTasksTotal = 0;
+        let goalTasksDone = 0;
+
+        subGoals.forEach(sg => {
+          (sg.tasks || []).forEach(t => {
+            goalTasksTotal++;
+            if (t.completed) goalTasksDone++;
+          });
+        });
+
+        const goalProgress = goalTasksTotal > 0 ? Math.round((goalTasksDone / goalTasksTotal) * 100) : 0;
+
+        return `
+          <div class="relative flex flex-col items-center">
+            
+            <!-- Tier 1: Strategic Goal Card -->
+            <div class="w-full max-w-3xl bg-white border border-apple-border rounded-3xl shadow-apple transition-all duration-200 hover:shadow-apple-hover p-5 sm:p-6 z-10">
+              <div class="flex items-start justify-between gap-4">
+                <div class="space-y-1.5 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-apple-dark bg-black/[0.04] px-2.5 py-0.5 rounded-full border border-black/[0.04]">
+                      ${escapeHtml(goal.pillar)}
+                    </span>
+                    <span class="text-[10px] font-medium text-apple-secondary bg-gray-100/80 px-2 py-0.5 rounded-full">
+                      ${escapeHtml(goal.horizon)}
+                    </span>
+                    <span class="text-[10px] font-medium text-apple-secondary">
+                      ${subGoals.length} Sub-goals • ${goalTasksTotal} Actions
+                    </span>
+                  </div>
+
+                  <h2 class="text-base sm:text-lg font-semibold tracking-tight text-apple-dark leading-snug">
+                    ${escapeHtml(goal.title)}
+                  </h2>
+                </div>
+
+                <!-- Goal Action Buttons -->
+                <div class="flex items-center space-x-1.5 flex-shrink-0">
+                  <button onclick="openGoalModal('${goal.id}')" title="Edit Strategic Goal" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                  </button>
+                  <button onclick="promptDeleteGoal('${goal.id}')" title="Delete Goal" class="p-1.5 text-apple-secondary hover:text-apple-danger rounded-xl hover:bg-rose-50 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                  <button onclick="toggleGoalCollapse('${goal.id}')" title="${goal.collapsed ? 'Expand Sub-goals' : 'Collapse Sub-goals'}" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
+                    <svg class="w-4 h-4 transform transition-transform duration-200 ${goal.collapsed ? '-rotate-90' : 'rotate-0'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mt-4 pt-3 border-t border-apple-border/50 flex items-center justify-between gap-4">
+                <div class="flex-1">
+                  <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-apple-dark h-1.5 rounded-full transition-all duration-300" style="width: ${goalProgress}%"></div>
+                  </div>
+                </div>
+                <div class="text-[11px] font-semibold text-apple-secondary flex items-center space-x-1 flex-shrink-0">
+                  <span>${goalProgress}%</span>
+                  <span class="text-gray-300">(${goalTasksDone}/${goalTasksTotal})</span>
+                </div>
+                <button onclick="openSubGoalModal('${goal.id}')" class="inline-flex items-center space-x-1 text-xs font-medium text-apple-blue hover:text-apple-blueHover bg-blue-50/60 hover:bg-blue-50 px-2.5 py-1 rounded-full transition ml-2">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                  <span>Sub-Goal</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Tier 2 & 3 Branches: Sub-Goals and Tasks -->
+            ${!goal.collapsed ? `
+              <!-- Vertical Stem from Goal Card down to Sub-goals -->
+              ${subGoals.length > 0 ? `<div class="tree-stem-v h-8"></div>` : ''}
+
+              <!-- Sub-Goals Container -->
+              <div class="w-full">
+                ${subGoals.length === 0 ? `
+                  <div class="mt-3 text-center py-4 bg-white/40 border border-dashed border-apple-border rounded-3xl max-w-md mx-auto">
+                    <p class="text-xs text-apple-secondary mb-2">No milestones defined under this goal yet.</p>
+                    <button onclick="openSubGoalModal('${goal.id}')" class="text-xs font-medium text-apple-blue hover:underline inline-flex items-center space-x-1">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                      <span>Add First Sub-Goal</span>
+                    </button>
+                  </div>
+                ` : `
+                  <div class="grid grid-cols-1 md:grid-cols-${Math.min(subGoals.length, 2)} lg:grid-cols-${Math.min(subGoals.length, 3)} gap-6 items-start justify-center">
+                    ${subGoals.map(sg => {
+                      const tasks = sg.tasks || [];
+                      const sgTotal = tasks.length;
+                      const sgDone = tasks.filter(t => t.completed).length;
+                      const sgProgress = sgTotal > 0 ? Math.round((sgDone / sgTotal) * 100) : 0;
+
+                      return `
+                        <div class="flex flex-col items-center w-full">
+                          
+                          <!-- Tier 2: Sub-Goal Card -->
+                          <div class="w-full bg-apple-card border border-apple-border rounded-2xl shadow-sm p-4 hover:shadow-apple transition-all duration-200">
+                            <div class="flex items-start justify-between gap-2">
+                              <div class="space-y-1 flex-1">
+                                <div class="flex items-center space-x-2">
+                                  <span class="text-[9px] font-semibold uppercase tracking-wider text-apple-blue bg-blue-50/80 px-2 py-0.5 rounded-full">
+                                    Sub-Goal
+                                  </span>
+                                  <span class="text-[10px] text-apple-secondary">
+                                    ${escapeHtml(sg.timeline || 'Phase')}
+                                  </span>
+                                </div>
+                                <h3 class="text-xs sm:text-sm font-semibold text-apple-dark leading-snug">
+                                  ${escapeHtml(sg.title)}
+                                </h3>
+                              </div>
+
+                              <div class="flex items-center space-x-1 flex-shrink-0">
+                                <button onclick="openSubGoalModal('${goal.id}', '${sg.id}')" title="Edit Sub-Goal" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
+                                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button onclick="promptDeleteSubGoal('${goal.id}', '${sg.id}')" title="Delete Sub-Goal" class="p-1 text-apple-secondary hover:text-apple-danger rounded-lg hover:bg-rose-50 transition">
+                                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                                <button onclick="toggleSubGoalCollapse('${goal.id}', '${sg.id}')" title="${sg.collapsed ? 'Expand Actions' : 'Collapse Actions'}" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
+                                  <svg class="w-3.5 h-3.5 transform transition-transform duration-200 ${sg.collapsed ? '-rotate-90' : 'rotate-0'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                              </div>
+                            </div>
+
+                            <!-- Sub-Goal Progress & Add Action -->
+                            <div class="mt-3 pt-2.5 border-t border-apple-border/40 flex items-center justify-between text-xs">
+                              <div class="flex items-center space-x-2 flex-1 mr-2">
+                                <div class="w-full max-w-[80px] bg-gray-100 rounded-full h-1 overflow-hidden">
+                                  <div class="bg-apple-blue h-1 rounded-full transition-all duration-300" style="width: ${sgProgress}%"></div>
+                                </div>
+                                <span class="text-[10px] text-apple-secondary font-medium">${sgDone}/${sgTotal}</span>
+                              </div>
+
+                              <button onclick="openTaskModal('${goal.id}', '${sg.id}')" class="text-[11px] font-medium text-apple-blue hover:text-apple-blueHover flex items-center space-x-1 bg-blue-50/50 hover:bg-blue-50 px-2 py-0.5 rounded-full transition">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                <span>Action</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          <!-- Tier 3: Tactical Actions / Tasks under this Sub-Goal -->
+                          ${!sg.collapsed ? `
+                            <!-- Stem to tasks -->
+                            ${tasks.length > 0 ? `<div class="tree-stem-v h-4"></div>` : ''}
+
+                            <div class="w-full space-y-2 mt-1">
+                              ${tasks.length === 0 ? `
+                                <div class="p-3 text-center bg-white/40 border border-dashed border-apple-border rounded-2xl">
+                                  <span class="text-[11px] text-apple-secondary">No tactical actions yet.</span>
+                                </div>
+                              ` : tasks.map(task => `
+                                <div class="group relative bg-white border border-apple-border rounded-2xl p-3 shadow-xs hover:border-apple-borderStrong hover:shadow-apple transition-all duration-200">
+                                  <div class="flex items-start space-x-2.5">
+                                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${goal.id}', '${sg.id}', '${task.id}')" class="apple-checkbox mt-0.5" aria-label="Mark task done">
+
+                                    <div class="flex-1 min-w-0">
+                                      <p class="text-xs font-medium text-apple-dark tracking-tight leading-snug transition ${task.completed ? 'line-through text-apple-tertiary' : ''}">
+                                        ${escapeHtml(task.title)}
+                                      </p>
+
+                                      <!-- Badges: Priority, Deadline, Cadence -->
+                                      <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                                        <!-- Priority Badge -->
+                                        <span class="text-[9px] px-2 py-0.5 rounded-full font-medium ${
+                                          task.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                                          task.priority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                                          'bg-gray-100 text-gray-600'
+                                        }">
+                                          ${escapeHtml(task.priority)}
+                                        </span>
+
+                                        <!-- Target Deadline Badge -->
+                                        ${task.deadline ? `
+                                          <span class="text-[9px] px-2 py-0.5 rounded-full border flex items-center space-x-1 ${getDeadlineToBadge(task.deadline, task.completed)}">
+                                            <svg class="w-2.5 h-2.5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            <span>${formatDeadline(task.deadline)}</span>
+                                          </span>
+                                        ` : ''}
+
+                                        <!-- Cadence Badge -->
+                                        ${task.cadence ? `
+                                          <span class="text-[9px] text-apple-secondary flex items-center space-x-1">
+                                            <svg class="w-2.5 h-2.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span>${escapeHtml(task.cadence)}</span>
+                                          </span>
+                                        ` : ''}
+                                      </div>
+                                    </div>
+
+                                    <!-- Task Action Buttons (Edit / Delete) -->
+                                    <div class="opacity-0 group-hover:opacity-100 flex items-center space-x-1 transition-opacity">
+                                      <button onclick="openTaskModal('${goal.id}', '${sg.id}', '${task.id}')" title="Edit Action" class="p-1 text-apple-secondary hover:text-apple-dark rounded-lg hover:bg-gray-100 transition">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                      </button>
+                                      <button onclick="promptDeleteTask('${goal.id}', '${sg.id}', '${task.id}')" title="Delete Action" class="p-1 text-apple-secondary hover:text-apple-danger rounded-lg hover:bg-rose-50 transition">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              `).join('')}
+                            </div>
+                          ` : ''}
+
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                `}
+              </div>
+            ` : ''}
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Initialize application on load
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
