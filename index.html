@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Strata • Strategic Execution Tree</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -76,6 +77,7 @@
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       background-color: #FFFFFF;
       flex-shrink: 0;
+      position: relative;
     }
     .apple-checkbox:hover {
       border-color: #0071E3;
@@ -92,6 +94,64 @@
       border: solid white;
       border-width: 0 2px 2px 0;
       transform: rotate(45deg) translate(-1px, -1px);
+    }
+
+    /* Duolingo-style Pop Animations */
+    @keyframes duoPopBounce {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.4) rotate(-4deg); }
+      70% { transform: scale(0.9) rotate(2deg); }
+      100% { transform: scale(1); }
+    }
+    .duo-bounce {
+      animation: duoPopBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Floating XP Badges */
+    @keyframes floatUpFade {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(0.6);
+      }
+      25% {
+        opacity: 1;
+        transform: translate(-50%, -14px) scale(1.15);
+      }
+      75% {
+        opacity: 1;
+        transform: translate(-50%, -32px) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -48px) scale(0.9);
+      }
+    }
+    .floating-xp-pill {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      animation: floatUpFade 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      font-weight: 800;
+      font-size: 11px;
+      letter-spacing: -0.02em;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      background: #1D1D1F;
+      color: #34C759;
+      border: 1px solid rgba(52, 199, 89, 0.4);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.18), 0 0 12px rgba(52,199,89,0.3);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    /* Milestone Golden Glow Pulse */
+    @keyframes goldenGlow {
+      0%, 100% { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04); }
+      50% { box-shadow: 0 0 25px 4px rgba(255, 184, 0, 0.55), 0 0 0 2px rgba(255, 184, 0, 0.9); }
+    }
+    .celebrate-milestone-gold {
+      animation: goldenGlow 1.2s ease-in-out;
     }
 
     /* Custom Scrollbars */
@@ -142,9 +202,29 @@
         </button>
       </div>
 
+      <!-- Gamification XP & Level Progression Pill -->
+      <div class="relative group">
+        <button onclick="toggleGamificationModal()" class="flex items-center space-x-2 bg-white/90 hover:bg-white border border-apple-border hover:border-amber-400/60 px-3 py-1.5 rounded-2xl shadow-xs transition duration-200">
+          <div class="w-6 h-6 rounded-lg bg-amber-400/20 text-amber-600 flex items-center justify-center font-black text-[11px] shadow-2xs">
+            ⚡
+          </div>
+          <div class="flex flex-col text-left pr-1">
+            <div class="flex items-center space-x-1.5">
+              <span id="nav-level-badge" class="text-[10px] font-black uppercase text-amber-600 tracking-wider">Lvl 1</span>
+              <span id="nav-level-title" class="text-xs font-semibold text-apple-dark truncate max-w-[110px] sm:max-w-[150px]">Couch Strategist</span>
+            </div>
+            <!-- Micro Progress Bar -->
+            <div class="w-24 sm:w-28 bg-gray-100 rounded-full h-1 mt-0.5 overflow-hidden">
+              <div id="nav-xp-bar" class="bg-gradient-to-r from-amber-400 to-emerald-500 h-1 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+          <span id="nav-xp-pill-text" class="text-[10px] font-bold text-apple-secondary hidden md:inline">0 XP</span>
+        </button>
+      </div>
+
       <!-- Real-time Progress Statistics -->
-      <div class="flex items-center space-x-2 sm:space-x-4">
-        <div id="stats-pill" class="hidden md:flex items-center space-x-2 bg-white/70 border border-apple-border px-3 py-1.5 rounded-full text-xs font-medium text-apple-secondary shadow-sm">
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <div id="stats-pill" class="hidden xl:flex items-center space-x-2 bg-white/70 border border-apple-border px-3 py-1.5 rounded-full text-xs font-medium text-apple-secondary shadow-sm">
           <span>0 Goals</span>
           <span class="text-gray-300">•</span>
           <span>0 Sub-goals</span>
@@ -157,10 +237,6 @@
         <button onclick="openGoalModal()" class="inline-flex items-center space-x-1.5 bg-apple-blue hover:bg-apple-blueHover text-white px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition shadow-sm active:scale-95">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
           <span class="hidden sm:inline">New Goal</span>
-        </button>
-
-        <button onclick="resetToSampleData()" title="Reset to sample strategic data" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-full hover:bg-black/5 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
         </button>
       </div>
     </div>
@@ -334,15 +410,15 @@
         <div class="lg:col-span-8 bg-white rounded-3xl border border-apple-border shadow-apple p-5 sm:p-6">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-apple-border/60">
             <div class="flex items-center space-x-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-apple-blue"></span>
-              <h3 class="text-xs font-semibold uppercase tracking-wider text-apple-secondary">Daily Timeline (06:00 – 22:00)</h3>
+            <!-- Timeline Rows Container -->
+            <div id="planner-timeline-grid" class="divide-y divide-apple-border/50">
+              <!-- Dynamically populated via renderPlannerTimeline() -->
             </div>
-            <span class="text-[11px] text-apple-tertiary">Click "+ Add to Slot" or assign from the task drawer</span>
           </div>
 
-          <!-- Timeline Rows Container -->
-          <div id="planner-timeline-grid" class="divide-y divide-apple-border/50">
-            <!-- Dynamically populated via renderPlannerTimeline() -->
+          <!-- AI Daily Focus Recommendations Widget (DailyFocusWidget) -->
+          <div id="ai-daily-focus-widget" class="mt-6 bg-white rounded-3xl border border-apple-border shadow-apple p-5 sm:p-6 transition-all">
+            <!-- Dynamically populated via renderDailyFocusWidget() -->
           </div>
         </div>
 
@@ -627,6 +703,152 @@
     </div>
   </div>
 
+  <!-- CELEBRATION MODAL: High-Energy Duolingo Celebration (Level Up / Sub-goal Crushed) -->
+  <div id="celebration-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md hidden transition-opacity duration-300">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-apple-modal border border-apple-border text-center transform scale-95 transition-all duration-300 relative overflow-hidden" id="celebration-modal-card">
+      <div class="absolute -top-12 -left-12 w-32 h-32 bg-amber-200/40 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-emerald-200/40 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Celebration Icon / Badge with Bouncy Animation -->
+      <div id="celebration-icon-box" class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-400 to-amber-200 text-white flex items-center justify-center text-4xl mx-auto mb-4 shadow-lg duo-bounce">
+        🏆
+      </div>
+
+      <span id="celebration-tag" class="inline-block text-[10px] font-extrabold uppercase tracking-widest text-amber-800 bg-amber-100 px-3 py-1 rounded-full mb-2">
+        SUB-GOAL CRUSHED!
+      </span>
+
+      <h3 id="celebration-title" class="text-xl sm:text-2xl font-black text-apple-dark tracking-tight leading-tight">
+        You're Moving Mountains!
+      </h3>
+      
+      <p id="celebration-desc" class="text-xs sm:text-sm text-apple-secondary mt-2 px-2 leading-relaxed">
+        Operational sub-goal locked and delivered. Strategic execution score just spiked.
+      </p>
+
+      <!-- Reward Breakdown Box -->
+      <div class="mt-5 p-3.5 bg-apple-subtle rounded-2xl border border-apple-border/80 flex items-center justify-around text-center">
+        <div>
+          <span class="block text-[10px] font-bold uppercase text-apple-tertiary">Reward</span>
+          <span id="celebration-xp-gained" class="text-lg font-black text-emerald-600">+200 XP</span>
+        </div>
+        <div class="h-8 w-px bg-apple-border/60"></div>
+        <div>
+          <span class="block text-[10px] font-bold uppercase text-apple-tertiary">Current Rank</span>
+          <span id="celebration-level-rank" class="text-xs font-bold text-apple-dark">Lvl 3 Operator</span>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-col sm:flex-row gap-2">
+        <button onclick="closeCelebrationModal()" class="w-full py-3 rounded-2xl text-xs sm:text-sm font-bold bg-apple-dark hover:bg-black text-white shadow-apple active:scale-95 transition-all">
+          Keep the Momentum Going 🔥
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAMIFICATION STATS DRAWER / MODAL -->
+  <div id="gamification-modal" onclick="if(event.target === this) closeGamificationModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-apple-modal border border-apple-border">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-border/60 mb-4">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">⚡</span>
+          <div>
+            <h3 class="text-sm font-bold text-apple-dark">Strategic XP Engine</h3>
+            <p class="text-[10px] text-apple-secondary">Gamified execution hierarchy</p>
+          </div>
+        </div>
+        <button onclick="closeGamificationModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Current Level Card -->
+        <div class="bg-gradient-to-br from-amber-50 to-orange-50/40 p-4 rounded-2xl border border-amber-200/70">
+          <div class="flex items-center justify-between">
+            <span id="drawer-level-pill" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-400 text-amber-950">Level 1</span>
+            <span id="drawer-total-xp" class="text-xs font-bold text-amber-900">0 Total XP</span>
+          </div>
+          <h4 id="drawer-level-title" class="text-base font-black text-apple-dark mt-1">Couch Strategist</h4>
+          
+          <div class="mt-3">
+            <div class="flex items-center justify-between text-[10px] font-semibold text-apple-secondary mb-1">
+              <span>Next Milestone</span>
+              <span id="drawer-level-progress-text">0 / 100 XP</span>
+            </div>
+            <div class="w-full bg-amber-100 rounded-full h-2 overflow-hidden">
+              <div id="drawer-xp-bar" class="bg-gradient-to-r from-amber-500 to-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- XP Reward Schema Explainer -->
+        <div class="bg-apple-subtle p-3.5 rounded-2xl border border-apple-border/80 space-y-2 text-xs">
+          <span class="block text-[10px] font-bold uppercase tracking-wider text-apple-secondary">XP Rewards Breakdown</span>
+          <div class="flex items-center justify-between text-apple-dark font-medium">
+            <span>✅ Complete Action</span>
+            <span class="font-bold text-emerald-600">+15 XP</span>
+          </div>
+          <div class="flex items-center justify-between text-apple-dark font-medium">
+            <span>🏁 Complete Milestone</span>
+            <span class="font-bold text-emerald-600">+60 XP</span>
+          </div>
+          <div class="flex items-center justify-between text-apple-dark font-medium">
+            <span>🚀 Complete Sub-Goal</span>
+            <span class="font-bold text-emerald-600">+200 XP</span>
+          </div>
+        </div>
+
+        <!-- Sound & Feedback Toggle -->
+        <div class="flex items-center justify-between p-3 rounded-2xl border border-apple-border">
+          <div class="flex items-center space-x-2">
+            <span class="text-sm">🔊</span>
+            <span class="text-xs font-semibold text-apple-dark">Audio Haptics</span>
+          </div>
+          <button onclick="toggleAudioMute()" id="audio-toggle-btn" class="px-2.5 py-1 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Enabled
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API KEY SETTINGS MODAL (BYOK Gemini) -->
+  <div id="api-key-modal" onclick="if(event.target === this) closeApiKeyModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-apple-modal border border-apple-border">
+      <div class="flex items-center justify-between pb-3 border-b border-apple-border/60 mb-4">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">✨</span>
+          <div>
+            <h3 class="text-sm font-bold text-apple-dark">Gemini API Key</h3>
+            <p class="text-[10px] text-apple-secondary">Power the AI Daily Focus Engine</p>
+          </div>
+        </div>
+        <button onclick="closeApiKeyModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-apple-secondary hover:bg-gray-100 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-apple-secondary leading-relaxed">
+          Enter your Gemini API key (BYOK) to generate real-time execution briefings. Leave blank to use default workspace credentials.
+        </p>
+        <div>
+          <label class="block text-[11px] font-semibold text-apple-dark mb-1">API Key</label>
+          <input type="password" id="custom-api-key-input" placeholder="AIzaSy..." class="w-full bg-apple-subtle border border-apple-border rounded-xl px-3 py-2 text-xs text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue transition">
+        </div>
+        <div class="pt-2 flex items-center justify-between">
+          <button onclick="clearCustomApiKey()" class="text-xs text-rose-600 hover:underline">Clear</button>
+          <div class="flex items-center space-x-2">
+            <button onclick="closeApiKeyModal()" class="px-3 py-1.5 rounded-xl text-xs font-medium text-apple-secondary hover:bg-gray-100 transition">Cancel</button>
+            <button onclick="saveCustomApiKey()" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-apple-dark text-white hover:bg-black transition">Save Key</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 bg-apple-dark text-white px-4 py-2.5 rounded-2xl text-xs shadow-lg flex items-center space-x-2">
     <span id="toast-message">Action committed</span>
@@ -801,10 +1023,280 @@
     // Reactive State
     let goals = [];
     let currentView = 'tree'; // 'tree' | 'calendar' | 'planner'
-    let calCurrentMonth = 10; // 0-indexed (10 = November)
+    let calCurrentMonth = 9; // 0-indexed (9 = October)
     let calCurrentYear = 2026;
-    let selectedCalendarDateStr = '2026-11-05';
-    let plannerActiveDateStr = '2026-11-05';
+    let selectedCalendarDateStr = '2026-10-26';
+    let plannerActiveDateStr = '2026-10-26';
+
+    // AI Daily Focus Recommendation State & Cache
+    let dailyFocusCache = {}; // { 'YYYY-MM-DD': { loading: boolean, data: object, error: string } }
+    let isDailyFocusGenerating = false;
+
+    // ==========================================
+    // GAMIFICATION & LEVEL PROGRESSION STATE
+    // ==========================================
+    let userXP = 0;
+    let audioFeedbackEnabled = true;
+
+    const LEVEL_TITLES = [
+      { level: 1, title: 'Couch Strategist', threshold: 100 },
+      { level: 2, title: 'Mildly Motivated', threshold: 200 },
+      { level: 3, title: 'Spreadsheet Gladiator', threshold: 300 },
+      { level: 4, title: 'Relentless Operator', threshold: 400 },
+      { level: 5, title: 'Unstoppable Force of Nature', threshold: 500 },
+      { level: 6, title: 'CEO of Getting Things Done', threshold: 600 },
+      { level: 7, title: 'Galactic Execution Deity', threshold: 700 }
+    ];
+
+    // Web Audio API procedural sound engine
+    let audioCtx = null;
+    function playAudioTone(type = 'pop') {
+      if (!audioFeedbackEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'pop') {
+          // Snappy high-pitch Duolingo pop
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+          osc.start(now);
+          osc.stop(now + 0.16);
+        } else if (type === 'milestone') {
+          // Golden chord chime
+          [587.33, 739.99, 880].forEach((freq, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, now + i * 0.05);
+            g.gain.setValueAtTime(0.15, now + i * 0.05);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.35);
+            o.start(now + i * 0.05);
+            o.stop(now + i * 0.05 + 0.36);
+          });
+        } else if (type === 'levelup') {
+          // Fanfare arpeggio
+          [440, 554.37, 659.25, 880, 1108.73].forEach((freq, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'sine';
+            o.frequency.setValueAtTime(freq, now + i * 0.08);
+            g.gain.setValueAtTime(0.2, now + i * 0.08);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.45);
+            o.start(now + i * 0.08);
+            o.stop(now + i * 0.08 + 0.46);
+          });
+        }
+      } catch (e) {
+        console.warn('Audio API muted or unsupported');
+      }
+    }
+
+    function calculateLevelData(totalXP) {
+      let currentLvl = 1;
+      let xpRemaining = totalXP;
+
+      for (let i = 0; i < LEVEL_TITLES.length; i++) {
+        const required = LEVEL_TITLES[i].threshold;
+        if (xpRemaining >= required) {
+          xpRemaining -= required;
+          currentLvl++;
+        } else {
+          const currentMeta = LEVEL_TITLES[i];
+          const pct = Math.min(100, Math.round((xpRemaining / required) * 100));
+          return {
+            level: currentLvl,
+            title: currentMeta.title,
+            currentXP: xpRemaining,
+            neededXP: required,
+            progressPct: pct,
+            totalXP: totalXP
+          };
+        }
+      }
+
+      // Max tier fallback
+      return {
+        level: LEVEL_TITLES.length + 1,
+        title: 'Galactic Execution Deity',
+        currentXP: xpRemaining,
+        neededXP: 1000,
+        progressPct: 100,
+        totalXP: totalXP
+      };
+    }
+
+    function addGamificationXP(amount, reason = '', event = null) {
+      const prevLvlData = calculateLevelData(userXP);
+      userXP += amount;
+      saveGamificationState();
+
+      const newLvlData = calculateLevelData(userXP);
+      renderGamificationHeader();
+
+      // Spawn floating +XP text at click event
+      if (event) {
+        spawnFloatingXPPill(event.clientX, event.clientY, `+${amount} XP`);
+      }
+
+      // Detect Level Up
+      if (newLvlData.level > prevLvlData.level) {
+        playAudioTone('levelup');
+        triggerConfettiBlast();
+        openCelebrationModal({
+          icon: '👑',
+          tag: 'NEW LEVEL UNLOCKED!',
+          title: `You are now a ${newLvlData.title}!`,
+          desc: `Ascended from Level ${prevLvlData.level} to Level ${newLvlData.level}. Strategic horsepower recognized!`,
+          reward: `+${amount} XP`,
+          rank: `Level ${newLvlData.level}`
+        });
+      }
+    }
+
+    function spawnFloatingXPPill(x, y, text) {
+      const pill = document.createElement('div');
+      pill.className = 'floating-xp-pill';
+      pill.innerHTML = `<span>⚡</span><span>${text}</span>`;
+      
+      const safeX = Math.max(40, Math.min(window.innerWidth - 70, x || (window.innerWidth / 2)));
+      const safeY = Math.max(40, y || (window.innerHeight / 2));
+
+      pill.style.left = `${safeX}px`;
+      pill.style.top = `${safeY}px`;
+
+      document.body.appendChild(pill);
+      setTimeout(() => {
+        pill.remove();
+      }, 900);
+    }
+
+    function triggerConfettiBlast(originX = 0.5, originY = 0.5) {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 75,
+          spread: 70,
+          origin: { x: originX, y: originY },
+          colors: ['#0071E3', '#34C759', '#FF9500', '#FF2D55', '#AF52DE']
+        });
+      }
+    }
+
+    function renderGamificationHeader() {
+      const data = calculateLevelData(userXP);
+      const badgeEl = document.getElementById('nav-level-badge');
+      const titleEl = document.getElementById('nav-level-title');
+      const barEl = document.getElementById('nav-xp-bar');
+      const textEl = document.getElementById('nav-xp-pill-text');
+
+      if (badgeEl) badgeEl.innerText = `Lvl ${data.level}`;
+      if (titleEl) titleEl.innerText = data.title;
+      if (barEl) barEl.style.width = `${data.progressPct}%`;
+      if (textEl) textEl.innerText = `${data.currentXP}/${data.neededXP} XP`;
+
+      // Also refresh drawer if open
+      const drawerLvl = document.getElementById('drawer-level-pill');
+      const drawerTitle = document.getElementById('drawer-level-title');
+      const drawerTotal = document.getElementById('drawer-total-xp');
+      const drawerProg = document.getElementById('drawer-level-progress-text');
+      const drawerBar = document.getElementById('drawer-xp-bar');
+
+      if (drawerLvl) drawerLvl.innerText = `Level ${data.level}`;
+      if (drawerTitle) drawerTitle.innerText = data.title;
+      if (drawerTotal) drawerTotal.innerText = `${data.totalXP} Total XP`;
+      if (drawerProg) drawerProg.innerText = `${data.currentXP} / ${data.neededXP} XP`;
+      if (drawerBar) drawerBar.style.width = `${data.progressPct}%`;
+    }
+
+    function openCelebrationModal({ icon, tag, title, desc, reward, rank }) {
+      const modal = document.getElementById('celebration-modal');
+      const iconBox = document.getElementById('celebration-icon-box');
+      const tagEl = document.getElementById('celebration-tag');
+      const titleEl = document.getElementById('celebration-title');
+      const descEl = document.getElementById('celebration-desc');
+      const xpEl = document.getElementById('celebration-xp-gained');
+      const rankEl = document.getElementById('celebration-level-rank');
+
+      if (iconBox) iconBox.innerText = icon || '🏆';
+      if (tagEl) tagEl.innerText = tag || 'CELEBRATION';
+      if (titleEl) titleEl.innerText = title || 'Milestone Reached!';
+      if (descEl) descEl.innerText = desc || 'Superb execution flow.';
+      if (xpEl) xpEl.innerText = reward || '+50 XP';
+      if (rankEl) rankEl.innerText = rank || 'Lvl Active';
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCelebrationModal() {
+      const modal = document.getElementById('celebration-modal');
+      modal.classList.add('hidden');
+    }
+
+    function toggleGamificationModal() {
+      const modal = document.getElementById('gamification-modal');
+      modal.classList.toggle('hidden');
+      renderGamificationHeader();
+    }
+
+    function closeGamificationModal() {
+      const modal = document.getElementById('gamification-modal');
+      modal.classList.add('hidden');
+    }
+
+    function toggleAudioMute() {
+      audioFeedbackEnabled = !audioFeedbackEnabled;
+      const btn = document.getElementById('audio-toggle-btn');
+      if (btn) {
+        if (audioFeedbackEnabled) {
+          btn.className = 'px-2.5 py-1 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200';
+          btn.innerText = 'Enabled';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded-xl text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200';
+          btn.innerText = 'Muted';
+        }
+      }
+      saveGamificationState();
+    }
+
+    function saveGamificationState() {
+      try {
+        localStorage.setItem('strata_gamification_v1', JSON.stringify({
+          xp: userXP,
+          audioEnabled: audioFeedbackEnabled
+        }));
+      } catch (e) {}
+    }
+
+    function loadGamificationState() {
+      try {
+        const stored = localStorage.getItem('strata_gamification_v1');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          userXP = parsed.xp || 0;
+          if (parsed.audioEnabled !== undefined) {
+            audioFeedbackEnabled = parsed.audioEnabled;
+          }
+        }
+      } catch (e) {}
+      renderGamificationHeader();
+    }
 
     // Timeline hours: 06:00 to 22:00
     const TIMELINE_HOURS = [
@@ -918,6 +1410,9 @@
         plannerSection.classList.remove('hidden');
         navBtnPlan.className = activeBtnClass;
         renderPlanner();
+        if (!dailyFocusCache[plannerActiveDateStr]) {
+          fetchDailyFocus(false);
+        }
       } else {
         treeSection.classList.remove('hidden');
         navBtnTree.className = activeBtnClass;
@@ -942,6 +1437,7 @@
         const d = String(date.getDate()).padStart(2, '0');
         plannerActiveDateStr = `${y}-${m}-${d}`;
         renderPlanner();
+        fetchDailyFocus(false);
       } catch (e) {
         console.error(e);
       }
@@ -957,6 +1453,7 @@
         const d = String(date.getDate()).padStart(2, '0');
         plannerActiveDateStr = `${y}-${m}-${d}`;
         renderPlanner();
+        fetchDailyFocus(false);
       } catch (e) {
         console.error(e);
       }
@@ -969,12 +1466,14 @@
       const d = String(now.getDate()).padStart(2, '0');
       plannerActiveDateStr = `${y}-${m}-${d}`;
       renderPlanner();
+      fetchDailyFocus(false);
     }
 
     function plannerSelectDate(dateStr) {
       if (!dateStr) return;
       plannerActiveDateStr = dateStr;
       renderPlanner();
+      fetchDailyFocus(false);
     }
 
     function calPrevMonth() {
@@ -1034,8 +1533,9 @@
     function init() {
       try {
         const stored = localStorage.getItem('strata_goals_v4');
+        let parsedGoals = null;
         if (stored) {
-          goals = JSON.parse(stored);
+          parsedGoals = JSON.parse(stored);
         } else {
           // Check for legacy v3 migration (where tasks need to become milestones with actions)
           const legacyV3 = localStorage.getItem('strata_goals_v3');
@@ -1066,16 +1566,129 @@
                 }
               });
             });
-            goals = parsed;
-            saveState();
-          } else {
-            goals = JSON.parse(JSON.stringify(INITIAL_GOALS));
-            saveState();
+            parsedGoals = parsed;
           }
+        }
+
+        // Academic schedule seed
+        const academicGoal = {
+          id: 'goal-academic-2026',
+          title: 'Master Fall 2026 Academic & Quantitative Curriculum',
+          pillar: 'Academics & Quantitative Rigor',
+          horizon: 'Fall Semester 2026',
+          collapsed: false,
+          subGoals: [
+            {
+              id: 'sg-acad-1',
+              title: 'Weekly Course Lectures & Seminars',
+              timeline: 'Oct 26 – Oct 30 • Active Week',
+              collapsed: false,
+              milestones: [
+                {
+                  id: 'm-acad-w1',
+                  title: 'Complete Week of Oct 26 Course Modules & Seminars',
+                  priority: 'High',
+                  deadline: '2026-10-30',
+                  collapsed: false,
+                  actions: [
+                    {
+                      id: 'act-acad-1',
+                      title: 'Business Logistics',
+                      location: 'Starr 204',
+                      timeRange: '09:55 – 12:30',
+                      cadence: '09:55 – 12:30 • Starr 204',
+                      scheduledDate: '2026-10-26',
+                      scheduledSlot: '09:00',
+                      durationMinutes: 155,
+                      completed: false
+                    },
+                    {
+                      id: 'act-acad-2',
+                      title: 'New Approaches to Sustainable Development',
+                      location: '6: 510',
+                      timeRange: '13:30 – 16:10',
+                      cadence: '13:30 – 16:10 • Room 6: 510',
+                      scheduledDate: '2026-10-26',
+                      scheduledSlot: '13:00',
+                      durationMinutes: 160,
+                      completed: false
+                    },
+                    {
+                      id: 'act-acad-3',
+                      title: "China's Financial System",
+                      location: '6: 101',
+                      timeRange: '09:55 – 12:30',
+                      cadence: '09:55 – 12:30 • Room 6: 101',
+                      scheduledDate: '2026-10-28',
+                      scheduledSlot: '09:00',
+                      durationMinutes: 155,
+                      completed: false
+                    },
+                    {
+                      id: 'act-acad-4',
+                      title: 'Econometrics',
+                      location: '',
+                      timeRange: '13:30 – 16:10',
+                      cadence: '13:30 – 16:10',
+                      scheduledDate: '2026-10-28',
+                      scheduledSlot: '13:00',
+                      durationMinutes: 160,
+                      completed: false
+                    },
+                    {
+                      id: 'act-acad-5',
+                      title: 'Global and Regional Engagement',
+                      location: '6: 106',
+                      timeRange: '15:25 – 17:05',
+                      cadence: '15:25 – 17:05 • Room 6: 106',
+                      scheduledDate: '2026-10-28',
+                      scheduledSlot: '15:00',
+                      durationMinutes: 100,
+                      completed: false
+                    },
+                    {
+                      id: 'act-acad-6',
+                      title: 'Economic Superpower',
+                      location: '6: 501',
+                      timeRange: '08:00 – 10:40',
+                      cadence: '08:00 – 10:40 • Room 6: 501',
+                      scheduledDate: '2026-10-29',
+                      scheduledSlot: '08:00',
+                      durationMinutes: 160,
+                      completed: false
+                    },
+                    {
+                      id: 'act-acad-7',
+                      title: 'Derivative Securities',
+                      location: '6: 307',
+                      timeRange: '18:30 – 21:30',
+                      cadence: '18:30 – 21:30 • Room 6: 307',
+                      scheduledDate: '2026-10-29',
+                      scheduledSlot: '18:00',
+                      durationMinutes: 180,
+                      completed: false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        };
+
+        if (parsedGoals && Array.isArray(parsedGoals) && parsedGoals.length > 0) {
+          // Merge academic goal if not present
+          const hasAcademic = parsedGoals.some(g => g.id === 'goal-academic-2026');
+          if (!hasAcademic) {
+            parsedGoals.unshift(academicGoal);
+          }
+          goals = parsedGoals;
+        } else {
+          goals = [academicGoal, ...JSON.parse(JSON.stringify(INITIAL_GOALS))];
         }
       } catch (e) {
         goals = JSON.parse(JSON.stringify(INITIAL_GOALS));
       }
+      loadGamificationState();
       render();
     }
 
@@ -1083,7 +1696,7 @@
       try {
         localStorage.setItem('strata_goals_v4', JSON.stringify(goals));
       } catch (e) {
-        console.error('Failed to save state:', e);
+        console.error('Failed to save state to localStorage:', e);
       }
     }
 
@@ -1364,62 +1977,8 @@
       document.getElementById('action-modal').classList.remove('hidden');
       setTimeout(() => document.getElementById('action-title-input').focus(), 50);
     }
-
-    function closeActionModal() {
-      document.getElementById('action-modal').classList.add('hidden');
-    }
-
-    function handleSaveAction(e) {
-      e.preventDefault();
-      const goalId = document.getElementById('action-goal-id').value;
-      const subGoalId = document.getElementById('action-subgoal-id').value;
-      const milestoneId = document.getElementById('action-milestone-id').value;
-      const editActionId = document.getElementById('action-edit-id').value;
-      const title = document.getElementById('action-title-input').value.trim();
-      const cadence = document.getElementById('action-cadence-input').value.trim() || 'Daily action';
-      const scheduledDate = document.getElementById('action-date-input').value || null;
-
-      if (!title) return;
-
-      const goal = goals.find(g => g.id === goalId);
-      if (goal && goal.subGoals) {
-        const sg = goal.subGoals.find(s => s.id === subGoalId);
-        if (sg && sg.milestones) {
-          const m = sg.milestones.find(item => item.id === milestoneId);
-          if (m) {
-            if (!m.actions) m.actions = [];
-
-            if (editActionId) {
-              const act = m.actions.find(a => a.id === editActionId);
-              if (act) {
-                act.title = title;
-                act.cadence = cadence;
-                if (scheduledDate) act.scheduledDate = scheduledDate;
-                showToast('Action updated');
-              }
-            } else {
-              m.actions.push({
-                id: 'act-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-                title,
-                cadence,
-                scheduledDate: scheduledDate || m.deadline || null,
-                scheduledSlot: null,
-                durationMinutes: 60,
-                completed: false
-              });
-              m.collapsed = false;
-              showToast('Action committed under milestone');
-            }
-            saveState();
-            render();
-            closeActionModal();
-          }
-        }
-      }
-    }
-
-    // Toggle Action Complete
-    function toggleAction(goalId, subGoalId, milestoneId, actionId) {
+    // Toggle Action Complete with Gamification Triggers
+    function toggleAction(goalId, subGoalId, milestoneId, actionId, event = null) {
       const goal = goals.find(g => g.id === goalId);
       if (goal && goal.subGoals) {
         const sg = goal.subGoals.find(s => s.id === subGoalId);
@@ -1428,7 +1987,62 @@
           if (m && m.actions) {
             const act = m.actions.find(a => a.id === actionId);
             if (act) {
-              act.completed = !act.completed;
+              const wasCompleted = act.completed;
+              act.completed = !wasCompleted;
+
+              // Play Duolingo-style Pop & Checkbox animation
+              if (event && event.target) {
+                event.target.classList.add('duo-bounce');
+                setTimeout(() => event.target.classList.remove('duo-bounce'), 450);
+              }
+
+              if (!wasCompleted) {
+                // Action Completed: +15 XP
+                playAudioTone('pop');
+                addGamificationXP(15, 'Action Completed', event);
+
+                // Check if this action completed the entire Milestone
+                const allMilestoneActionsDone = m.actions.every(a => a.completed);
+                if (allMilestoneActionsDone) {
+                  setTimeout(() => {
+                    playAudioTone('milestone');
+                    addGamificationXP(60, 'Milestone Delivered', event);
+                    
+                    // Card celebration: localized confetti blast
+                    let confX = 0.5, confY = 0.5;
+                    if (event) {
+                      confX = event.clientX / window.innerWidth;
+                      confY = event.clientY / window.innerHeight;
+                    }
+                    triggerConfettiBlast(confX, confY);
+                    showToast('🏆 Milestone Accomplished! +60 XP');
+
+                    // Check if all milestones in the sub-goal are completed
+                    const allSubGoalMilestonesDone = sg.milestones.every(ms => (ms.actions || []).every(a => a.completed));
+                    if (allSubGoalMilestonesDone) {
+                      setTimeout(() => {
+                        playAudioTone('levelup');
+                        addGamificationXP(200, 'Sub-Goal Crushed');
+                        triggerConfettiBlast(0.5, 0.4);
+                        openCelebrationModal({
+                          icon: '🚀',
+                          tag: 'SUB-GOAL CRUSHED!',
+                          title: "You're Moving Mountains!",
+                          desc: `All deliverables locked under "${sg.title}". Strategic momentum is peak.`,
+                          reward: '+200 XP BONUS',
+                          rank: calculateLevelData(userXP).title
+                        });
+                      }, 400);
+                    }
+                  }, 250);
+                }
+              } else {
+                // Unchecked: gently subtract action XP (clamped at 0)
+                userXP = Math.max(0, userXP - 15);
+                saveGamificationState();
+                renderGamificationHeader();
+              }
+
               saveState();
               render();
             }
@@ -1735,7 +2349,13 @@
       let timelineHtml = '';
 
       TIMELINE_HOURS.forEach(hour => {
-        const actionsInHour = slotMap[hour] || [];
+        const hourPrefix = hour.split(':')[0];
+        // Match exact slot, or slot within the same hour
+        const actionsInHour = scheduledActions.filter(act => {
+          if (act.scheduledSlot === hour) return true;
+          if (act.scheduledSlot && act.scheduledSlot.startsWith(hourPrefix + ':')) return true;
+          return false;
+        });
         const isOccupied = actionsInHour.length > 0;
 
         timelineHtml += `
@@ -1765,20 +2385,30 @@
                 <div class="space-y-2">
                   ${actionsInHour.map(act => {
                     const dur = act.durationMinutes || 60;
-                    const durLabel = dur >= 60 ? `${dur / 60}h` : `${dur}m`;
+                    const hours = Math.floor(dur / 60);
+                    const mins = dur % 60;
+                    const durLabel = hours > 0 ? (mins > 0 ? `${hours}h ${mins}m` : `${hours}h`) : `${mins}m`;
+                    const timeDisplay = act.timeRange || `${hour} • ${durLabel}`;
 
                     return `
-                      <div class="bg-white border ${act.completed ? 'border-apple-border bg-gray-50/70' : 'border-apple-borderStrong shadow-xs'} rounded-2xl p-3 sm:p-3.5 transition-all">
+                      <div class="bg-white border ${act.completed ? 'border-apple-border bg-gray-50/70' : 'border-indigo-100 shadow-xs hover:border-indigo-200'} rounded-2xl p-3 sm:p-3.5 transition-all">
                         <div class="flex items-start justify-between gap-2">
                           <div class="flex items-start space-x-3 flex-1 min-w-0">
-                            <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleAction('${act.goalId}', '${act.subGoalId}', '${act.milestoneId}', '${act.id}')" class="apple-checkbox mt-0.5" aria-label="Mark action done">
+                            <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleAction('${act.goalId}', '${act.subGoalId}', '${act.milestoneId}', '${act.id}', event)" class="apple-checkbox mt-0.5" aria-label="Mark action done">
                             
                             <div class="flex-1 min-w-0">
                               <div class="flex flex-wrap items-center gap-1.5 mb-1">
-                                <span class="text-[9px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.2 rounded-full">
-                                  ${hour} • ${durLabel} block
+                                <span class="text-[10px] font-bold tracking-tight text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md flex items-center space-x-1">
+                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                  <span>${escapeHtml(timeDisplay)}</span>
                                 </span>
-                                <span class="text-[9px] px-2 py-0.2 rounded-full font-medium ${
+                                ${act.location ? `
+                                  <span class="text-[10px] font-semibold text-apple-secondary bg-gray-100 border border-apple-border/70 px-2 py-0.5 rounded-md flex items-center space-x-1">
+                                    <svg class="w-3 h-3 text-apple-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <span>${escapeHtml(act.location)}</span>
+                                  </span>
+                                ` : ''}
+                                <span class="text-[9px] px-2 py-0.5 rounded-md font-medium ${
                                   act.milestonePriority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
                                   act.milestonePriority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
                                   'bg-gray-100 text-gray-600'
@@ -1869,6 +2499,334 @@
           `;
         }).join('');
       }
+
+      // Render the AI Daily Focus Recommendations Widget at the bottom
+      renderDailyFocusWidget();
+    }
+
+    // ==========================================
+    // AI DAILY FOCUS RECOMMENDATIONS ENGINE
+    // ==========================================
+    function openApiKeyModal() {
+      const input = document.getElementById('custom-api-key-input');
+      if (input) {
+        input.value = localStorage.getItem('strata_gemini_api_key') || '';
+      }
+      document.getElementById('api-key-modal').classList.remove('hidden');
+    }
+
+    function closeApiKeyModal() {
+      document.getElementById('api-key-modal').classList.add('hidden');
+    }
+
+    function saveCustomApiKey() {
+      const input = document.getElementById('custom-api-key-input');
+      if (input) {
+        const key = input.value.trim();
+        if (key) {
+          localStorage.setItem('strata_gemini_api_key', key);
+          showToast('Gemini API key saved');
+        } else {
+          localStorage.removeItem('strata_gemini_api_key');
+          showToast('API key reset to default');
+        }
+      }
+      closeApiKeyModal();
+      fetchDailyFocus(true);
+    }
+
+    function clearCustomApiKey() {
+      localStorage.removeItem('strata_gemini_api_key');
+      const input = document.getElementById('custom-api-key-input');
+      if (input) input.value = '';
+      showToast('API key cleared');
+      closeApiKeyModal();
+    }
+
+    async function fetchWithRetry(url, options, maxRetries = 3) {
+      let delay = 1000;
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          const res = await fetch(url, options);
+          if (res.status === 429 && i < maxRetries - 1) {
+            await new Promise(r => setTimeout(r, delay));
+            delay *= 2;
+            continue;
+          }
+          return res;
+        } catch (err) {
+          if (i === maxRetries - 1) throw err;
+          await new Promise(r => setTimeout(r, delay));
+          delay *= 2;
+        }
+      }
+    }
+
+    async function fetchDailyFocus(forceRefresh = false) {
+      const dateStr = plannerActiveDateStr;
+      if (!forceRefresh && dailyFocusCache[dateStr] && !dailyFocusCache[dateStr].loading) {
+        renderDailyFocusWidget();
+        return;
+      }
+
+      const allActions = getAllActionsWithContext();
+      const scheduledToday = allActions.filter(act => act.scheduledDate === dateStr);
+      const dueToday = allActions.filter(act => act.milestoneDeadline === dateStr);
+
+      // Unique actions scheduled or due today
+      const todayMap = new Map();
+      [...scheduledToday, ...dueToday].forEach(item => todayMap.set(item.id, item));
+      const todayActions = Array.from(todayMap.values());
+
+      // If no tasks exist for this date, provide instant clean zero-state
+      if (todayActions.length === 0) {
+        dailyFocusCache[dateStr] = {
+          loading: false,
+          empty: true,
+          data: null
+        };
+        renderDailyFocusWidget();
+        return;
+      }
+
+      dailyFocusCache[dateStr] = {
+        loading: true,
+        data: null,
+        error: null
+      };
+      isDailyFocusGenerating = true;
+      renderDailyFocusWidget();
+
+      // Gather overdue actions for context
+      const overdueActions = allActions.filter(act => {
+        if (act.completed || !act.milestoneDeadline) return false;
+        return act.milestoneDeadline < dateStr;
+      });
+
+      const dayOfWeek = new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' });
+      const contextSummary = {
+        date: dateStr,
+        dayOfWeek: dayOfWeek,
+        actionsForDay: todayActions.map(a => ({
+          title: a.title,
+          priority: a.milestonePriority || 'Medium',
+          durationMinutes: a.durationMinutes || 60,
+          scheduledSlot: a.scheduledSlot || 'Unscheduled',
+          timeRange: a.timeRange || null,
+          location: a.location || null,
+          milestone: a.milestoneTitle,
+          goal: a.goalTitle,
+          completed: a.completed
+        })),
+        overdueCount: overdueActions.length,
+        overdueTitles: overdueActions.slice(0, 3).map(a => a.title)
+      };
+
+      const systemPrompt = "You are an elite execution strategist inside Strata. Given the user's due and scheduled tasks for today, generate a punchy 3-part daily briefing:\n" +
+        "1. Primary Needle-Mover (1 sentence specifying the single most critical task and why).\n" +
+        "2. Execution Sequence (A 3-step prioritized order: tackle high-cognitive tasks first, batch low-energy admin later).\n" +
+        "3. Tactical Note (1 short reminder about buffer time, energy management, or risk mitigation).\n" +
+        "Keep it direct, crisp, and under 90 words. No corporate jargon or filler.";
+
+      const userQuery = `Current date: ${dayOfWeek}, ${formatDeadline(dateStr)}.\nTasks:\n${JSON.stringify(contextSummary, null, 2)}`;
+
+      const customApiKey = localStorage.getItem('strata_gemini_api_key') || '';
+      const apiKey = customApiKey;
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: {
+          parts: [{ text: systemPrompt }]
+        },
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              primaryNeedleMover: { type: 'STRING' },
+              executionSequence: {
+                type: 'ARRAY',
+                items: { type: 'STRING' }
+              },
+              tacticalNote: { type: 'STRING' }
+            },
+            required: ['primaryNeedleMover', 'executionSequence', 'tacticalNote']
+          }
+        }
+      };
+
+      try {
+        const response = await fetchWithRetry(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!jsonText) throw new Error('Empty response from model');
+
+        const parsedData = JSON.parse(jsonText);
+        dailyFocusCache[dateStr] = {
+          loading: false,
+          empty: false,
+          data: parsedData,
+          error: null
+        };
+      } catch (err) {
+        console.warn('AI Focus generation fallback activated:', err);
+        // Resilient fallback generation based on real data
+        const topTask = todayActions.find(a => a.milestonePriority === 'High' && !a.completed) || todayActions[0];
+        dailyFocusCache[dateStr] = {
+          loading: false,
+          empty: false,
+          data: {
+            primaryNeedleMover: `Anchor your mental bandwidth around "${topTask?.title || 'core class block'}" as your highest-leverage deliverable.`,
+            executionSequence: [
+              `Execute "${todayActions[0]?.title || 'Morning focus block'}" during peak morning cognitive energy.`,
+              todayActions[1] ? `Transition into "${todayActions[1].title}" before mid-afternoon fatigue sets in.` : `Review tactical milestones and clear upcoming deadlines.`,
+              todayActions[2] ? `Close the day by wrapping up "${todayActions[2].title}".` : `Consolidate notes and prepare tomorrow's morning queue.`
+            ],
+            tacticalNote: `Maintain a 15-minute buffer between class transitions and deep-work sessions to prevent attention residue.`
+          },
+          error: customApiKey ? null : 'configured'
+        };
+      } finally {
+        isDailyFocusGenerating = false;
+        renderDailyFocusWidget();
+      }
+    }
+
+    function renderDailyFocusWidget() {
+      const widgetContainer = document.getElementById('ai-daily-focus-widget');
+      if (!widgetContainer) return;
+
+      const dateStr = plannerActiveDateStr;
+      const formattedDate = formatDeadline(dateStr);
+      const state = dailyFocusCache[dateStr] || { loading: false, data: null };
+
+      // Widget Header (always visible)
+      const headerHtml = `
+        <div class="flex items-center justify-between pb-3.5 mb-4 border-b border-apple-border/60">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+              ✨
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="text-xs sm:text-sm font-bold text-apple-dark">Daily Focus Engine</h3>
+                <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                  AI Triage
+                </span>
+              </div>
+              <p class="text-[11px] text-apple-secondary">Optimized for ${escapeHtml(formattedDate)}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-1.5">
+            <button onclick="openApiKeyModal()" title="Gemini API Key Settings" class="p-1.5 text-apple-secondary hover:text-apple-dark hover:bg-gray-100 rounded-xl transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+            </button>
+            <button onclick="fetchDailyFocus(true)" ${state.loading ? 'disabled' : ''} class="inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-apple-blue hover:bg-blue-50/80 border border-apple-blue/20 transition active:scale-95 disabled:opacity-50">
+              <svg class="w-3.5 h-3.5 ${state.loading ? 'animate-spin' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              <span class="hidden sm:inline">${state.loading ? 'Thinking...' : 'Refresh'}</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      // State 1: Loading Skeleton
+      if (state.loading) {
+        widgetContainer.innerHTML = `
+          ${headerHtml}
+          <div class="space-y-4 animate-pulse">
+            <!-- Shimmer Top Priority -->
+            <div class="h-16 bg-gray-100 rounded-2xl w-full"></div>
+            <!-- Shimmer Sequence Steps -->
+            <div class="space-y-2">
+              <div class="h-4 bg-gray-100 rounded-md w-3/4"></div>
+              <div class="h-4 bg-gray-100 rounded-md w-5/6"></div>
+              <div class="h-4 bg-gray-100 rounded-md w-2/3"></div>
+            </div>
+            <!-- Shimmer Tactical Note -->
+            <div class="h-10 bg-gray-50 rounded-xl w-full"></div>
+          </div>
+        `;
+        return;
+      }
+
+      // State 2: Empty State
+      if (state.empty || !state.data) {
+        widgetContainer.innerHTML = `
+          ${headerHtml}
+          <div class="p-6 text-center bg-apple-subtle/80 border border-dashed border-apple-border rounded-2xl">
+            <svg class="w-6 h-6 text-apple-tertiary mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <p class="text-xs font-semibold text-apple-dark">No active tasks due today</p>
+            <p class="text-[11px] text-apple-secondary mt-0.5">Great day for deep-horizon planning, milestone review, or strategic resting.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // State 3: Active Populated Briefing State
+      const data = state.data;
+      const sequenceList = Array.isArray(data.executionSequence) ? data.executionSequence : [];
+
+      widgetContainer.innerHTML = `
+        ${headerHtml}
+
+        <div class="space-y-4">
+          <!-- The "One Thing" / Primary Needle Mover Banner -->
+          <div class="relative overflow-hidden bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-300/80 rounded-2xl p-3.5 sm:p-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-2xs mt-0.5">
+                🎯
+              </div>
+              <div class="flex-1 min-w-0">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-800">Primary Needle-Mover</span>
+                <p class="text-xs sm:text-sm font-semibold text-apple-dark mt-0.5 leading-snug">
+                  ${escapeHtml(data.primaryNeedleMover || '')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tactical Sequencing Grid -->
+          <div class="space-y-2">
+            <span class="block text-[10px] font-bold uppercase tracking-wider text-apple-secondary">Tactical Sequencing</span>
+            <div class="grid grid-cols-1 gap-2">
+              ${sequenceList.map((step, idx) => `
+                <div class="flex items-start space-x-2.5 p-2.5 rounded-xl bg-apple-subtle border border-apple-border/70 text-xs">
+                  <span class="w-5 h-5 rounded-md bg-white border border-apple-border text-apple-dark font-black text-[10px] flex items-center justify-center flex-shrink-0 shadow-2xs">
+                    ${idx + 1}
+                  </span>
+                  <p class="text-xs text-apple-dark font-medium leading-relaxed flex-1">
+                    ${escapeHtml(step)}
+                  </p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Watchouts / Friction & Buffer Management -->
+          <div class="flex items-start space-x-2.5 p-3 rounded-2xl bg-indigo-50/40 border border-indigo-100 text-xs">
+            <div class="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[11px] flex-shrink-0 mt-0.5">
+              💡
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700">Watchout & Buffer Tip</span>
+              <p class="text-[11px] text-apple-secondary mt-0.5 leading-relaxed">
+                ${escapeHtml(data.tacticalNote || '')}
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     // Calendar View Renderer (tracks Milestones & their Actions)
@@ -2050,7 +3008,7 @@
               <div class="mt-2.5 pt-2 border-t border-apple-border/50 space-y-1.5">
                 ${actions.map(act => `
                   <div class="flex items-center space-x-2 text-xs">
-                    <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleAction('${m.goalId}', '${m.subGoalId}', '${m.id}', '${act.id}')" class="apple-checkbox" aria-label="Mark action done">
+                    <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleAction('${m.goalId}', '${m.subGoalId}', '${m.id}', '${act.id}', event)" class="apple-checkbox" aria-label="Mark action done">
                     <span class="flex-1 truncate ${act.completed ? 'line-through text-apple-tertiary' : 'text-apple-dark'}">${escapeHtml(act.title)}</span>
                     <button onclick="openScheduleModal('${m.goalId}', '${m.subGoalId}', '${m.id}', '${act.id}', '09:00')" title="Schedule Action" class="text-[10px] text-apple-blue hover:underline">
                       Plan
@@ -2161,7 +3119,7 @@
       }
 
       // Render 4-tier tree: Goals -> Sub-Goals -> Milestones -> Actions
-      container.innerHTML = goals.map((goal) => {
+      container.innerHTML = goals.map((goal, gIndex) => {
         const subGoals = goal.subGoals || [];
         let goalActionsTotal = 0;
         let goalActionsDone = 0;
@@ -2182,54 +3140,63 @@
         return `
           <div class="relative flex flex-col items-center">
             
-            <!-- Tier 1: Strategic Goal Card -->
-            <div class="w-full max-w-3xl bg-white border border-apple-border rounded-3xl shadow-apple transition-all duration-200 hover:shadow-apple-hover p-5 sm:p-6 z-10">
+            <!-- Tier 1: Strategic Goal Card (High Elevation, Authoritative Anchor) -->
+            <div class="w-full max-w-3xl bg-white border border-apple-borderStrong/90 rounded-3xl shadow-apple-hover transition-all duration-300 p-6 z-10 relative overflow-hidden group">
+              <!-- Top decorative accent line -->
+              <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-apple-dark via-apple-blue to-indigo-600"></div>
+
               <div class="flex items-start justify-between gap-4">
-                <div class="space-y-1.5 flex-1">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-[10px] font-semibold uppercase tracking-wider text-apple-dark bg-black/[0.04] px-2.5 py-0.5 rounded-full border border-black/[0.04]">
-                      ${escapeHtml(goal.pillar)}
-                    </span>
-                    <span class="text-[10px] font-medium text-apple-secondary bg-gray-100/80 px-2 py-0.5 rounded-full">
-                      ${escapeHtml(goal.horizon)}
-                    </span>
-                    <span class="text-[10px] font-medium text-apple-secondary">
-                      ${subGoals.length} Sub-goals • ${goalMilestonesCount} Milestones • ${goalActionsTotal} Actions
-                    </span>
+                <div class="flex items-start space-x-3.5 flex-1 min-w-0">
+                  <!-- Level 1 Glyph Badge -->
+                  <div class="w-10 h-10 rounded-2xl bg-apple-dark text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                   </div>
 
-                  <h2 class="text-base sm:text-lg font-semibold tracking-tight text-apple-dark leading-snug">
-                    ${escapeHtml(goal.title)}
-                  </h2>
+                  <div class="space-y-1.5 flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="text-[10px] font-bold uppercase tracking-wider text-white bg-apple-dark px-2.5 py-0.5 rounded-full shadow-xs">
+                        STRATEGIC GOAL
+                      </span>
+                      <span class="text-[10px] font-semibold text-apple-secondary bg-gray-100 border border-apple-border px-2 py-0.5 rounded-full">
+                        ${escapeHtml(goal.pillar)}
+                      </span>
+                      <span class="text-[10px] font-medium text-apple-tertiary bg-gray-50 border border-apple-border/50 px-2 py-0.5 rounded-full">
+                        🎯 ${escapeHtml(goal.horizon)}
+                      </span>
+                    </div>
+
+                    <h2 class="text-base sm:text-lg font-bold tracking-tight text-apple-dark leading-snug">
+                      ${escapeHtml(goal.title)}
+                    </h2>
+                  </div>
                 </div>
 
                 <div class="flex items-center space-x-1.5 flex-shrink-0">
-                  <button onclick="openGoalModal('${goal.id}')" title="Edit Strategic Goal" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
+                  <button onclick="openGoalModal('${goal.id}')" title="Edit Strategic Goal" class="p-2 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                   </button>
-                  <button onclick="promptDeleteGoal('${goal.id}')" title="Delete Goal" class="p-1.5 text-apple-secondary hover:text-apple-danger rounded-xl hover:bg-rose-50 transition">
+                  <button onclick="promptDeleteGoal('${goal.id}')" title="Delete Goal" class="p-2 text-apple-secondary hover:text-apple-danger rounded-xl hover:bg-rose-50 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                   </button>
-                  <button onclick="toggleGoalCollapse('${goal.id}')" title="${goal.collapsed ? 'Expand Sub-goals' : 'Collapse Sub-goals'}" class="p-1.5 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
+                  <button onclick="toggleGoalCollapse('${goal.id}')" title="${goal.collapsed ? 'Expand Sub-goals' : 'Collapse Sub-goals'}" class="p-2 text-apple-secondary hover:text-apple-dark rounded-xl hover:bg-gray-100 transition">
                     <svg class="w-4 h-4 transform transition-transform duration-200 ${goal.collapsed ? '-rotate-90' : 'rotate-0'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                   </button>
                 </div>
               </div>
 
-              <!-- Goal Progress Bar -->
-              <div class="mt-4 pt-3 border-t border-apple-border/50 flex items-center justify-between gap-4">
-                <div class="flex-1">
-                  <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-apple-dark h-1.5 rounded-full transition-all duration-300" style="width: ${goalProgress}%"></div>
+              <!-- Goal Progress Bar & Footer -->
+              <div class="mt-4 pt-3.5 border-t border-apple-border/60 flex items-center justify-between gap-4">
+                <div class="flex items-center space-x-3 flex-1">
+                  <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden shadow-inner">
+                    <div class="bg-gradient-to-r from-apple-dark to-apple-blue h-2 rounded-full transition-all duration-300" style="width: ${goalProgress}%"></div>
                   </div>
+                  <span class="text-xs font-bold text-apple-dark flex-shrink-0">${goalProgress}%</span>
+                  <span class="text-[11px] text-apple-secondary hidden sm:inline-block flex-shrink-0">(${goalActionsDone}/${goalActionsTotal} actions complete)</span>
                 </div>
-                <div class="text-[11px] font-semibold text-apple-secondary flex items-center space-x-1 flex-shrink-0">
-                  <span>${goalProgress}%</span>
-                  <span class="text-gray-300">(${goalActionsDone}/${goalActionsTotal} actions)</span>
-                </div>
-                <button onclick="openSubGoalModal('${goal.id}')" class="inline-flex items-center space-x-1 text-xs font-medium text-apple-blue hover:text-apple-blueHover bg-blue-50/60 hover:bg-blue-50 px-2.5 py-1 rounded-full transition ml-2">
+
+                <button onclick="openSubGoalModal('${goal.id}')" class="inline-flex items-center space-x-1.5 text-xs font-semibold text-white bg-apple-dark hover:bg-black px-3.5 py-1.5 rounded-full transition shadow-xs active:scale-95 flex-shrink-0">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                  <span>Sub-Goal</span>
+                  <span>+ Sub-Goal</span>
                 </button>
               </div>
             </div>
@@ -2240,16 +3207,16 @@
 
               <div class="w-full">
                 ${subGoals.length === 0 ? `
-                  <div class="mt-3 text-center py-4 bg-white/40 border border-dashed border-apple-border rounded-3xl max-w-md mx-auto">
-                    <p class="text-xs text-apple-secondary mb-2">No sub-goals defined under this goal yet.</p>
-                    <button onclick="openSubGoalModal('${goal.id}')" class="text-xs font-medium text-apple-blue hover:underline inline-flex items-center space-x-1">
+                  <div class="mt-3 text-center py-6 bg-white/60 border border-dashed border-apple-border rounded-3xl max-w-md mx-auto">
+                    <p class="text-xs text-apple-secondary mb-2">No operational sub-goals defined under this goal yet.</p>
+                    <button onclick="openSubGoalModal('${goal.id}')" class="text-xs font-semibold text-apple-blue hover:underline inline-flex items-center space-x-1">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                       <span>Add First Sub-Goal</span>
                     </button>
                   </div>
                 ` : `
                   <div class="grid grid-cols-1 md:grid-cols-${Math.min(subGoals.length, 2)} lg:grid-cols-${Math.min(subGoals.length, 3)} gap-6 items-start justify-center">
-                    ${subGoals.map(sg => {
+                    ${subGoals.map((sg, sgIdx) => {
                       const milestones = sg.milestones || [];
                       let sgActionsTotal = 0;
                       let sgActionsDone = 0;
@@ -2266,19 +3233,21 @@
                       return `
                         <div class="flex flex-col items-center w-full">
                           
-                          <!-- Tier 2: Sub-Goal Card -->
-                          <div class="w-full bg-apple-card border border-apple-border rounded-2xl shadow-sm p-4 hover:shadow-apple transition-all duration-200">
+                          <!-- Tier 2: Sub-Goal Card (Workstream / Track Style: Left Indigo Accent Bar, Soft Indigo Wash) -->
+                          <div class="w-full bg-gradient-to-br from-indigo-50/40 via-white to-white border-l-4 border-l-apple-blue border-y border-r border-apple-border/80 rounded-2xl shadow-sm p-4 hover:shadow-apple transition-all duration-200">
                             <div class="flex items-start justify-between gap-2">
-                              <div class="space-y-1 flex-1">
+                              <div class="space-y-1.5 flex-1 min-w-0">
                                 <div class="flex items-center space-x-2">
-                                  <span class="text-[9px] font-semibold uppercase tracking-wider text-apple-blue bg-blue-50/80 px-2 py-0.5 rounded-full">
-                                    Sub-Goal
+                                  <span class="inline-flex items-center space-x-1 text-[9px] font-bold uppercase tracking-wider text-apple-blue bg-blue-100/70 border border-blue-200/60 px-2 py-0.5 rounded-full">
+                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                    <span>SUB-GOAL TRACK</span>
                                   </span>
-                                  <span class="text-[10px] text-apple-secondary">
+                                  <span class="text-[10px] font-semibold text-apple-secondary bg-white/80 border border-apple-border/50 px-2 py-0.5 rounded-full">
                                     ${escapeHtml(sg.timeline || 'Phase')}
                                   </span>
                                 </div>
-                                <h3 class="text-xs sm:text-sm font-semibold text-apple-dark leading-snug">
+
+                                <h3 class="text-xs sm:text-sm font-bold text-apple-dark leading-snug">
                                   ${escapeHtml(sg.title)}
                                 </h3>
                               </div>
@@ -2297,17 +3266,17 @@
                             </div>
 
                             <!-- Sub-Goal Progress & Add Milestone Button -->
-                            <div class="mt-3 pt-2.5 border-t border-apple-border/40 flex items-center justify-between text-xs">
+                            <div class="mt-3 pt-2.5 border-t border-apple-border/50 flex items-center justify-between text-xs">
                               <div class="flex items-center space-x-2 flex-1 mr-2">
-                                <div class="w-full max-w-[80px] bg-gray-100 rounded-full h-1 overflow-hidden">
-                                  <div class="bg-apple-blue h-1 rounded-full transition-all duration-300" style="width: ${sgProgress}%"></div>
+                                <div class="w-full max-w-[85px] bg-blue-100/60 rounded-full h-1.5 overflow-hidden">
+                                  <div class="bg-apple-blue h-1.5 rounded-full transition-all duration-300" style="width: ${sgProgress}%"></div>
                                 </div>
-                                <span class="text-[10px] text-apple-secondary font-medium">${sgActionsDone}/${sgActionsTotal} actions</span>
+                                <span class="text-[10px] font-semibold text-apple-secondary">${sgActionsDone}/${sgActionsTotal} actions</span>
                               </div>
 
-                              <button onclick="openMilestoneModal('${goal.id}', '${sg.id}')" class="text-[11px] font-medium text-apple-blue hover:text-apple-blueHover flex items-center space-x-1 bg-blue-50/50 hover:bg-blue-50 px-2 py-0.5 rounded-full transition">
+                              <button onclick="openMilestoneModal('${goal.id}', '${sg.id}')" class="text-[11px] font-semibold text-apple-blue hover:text-apple-blueHover flex items-center space-x-1 bg-white hover:bg-blue-50/80 border border-apple-blue/20 px-2.5 py-1 rounded-full transition shadow-2xs">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                <span>Milestone</span>
+                                <span>+ Milestone</span>
                               </button>
                             </div>
                           </div>
@@ -2327,25 +3296,27 @@
                                 const mProgress = actions.length > 0 ? Math.round((mActionsDone / actions.length) * 100) : 0;
 
                                 return `
-                                  <div class="group/m relative bg-white border border-apple-border rounded-2xl p-3.5 shadow-xs hover:border-apple-borderStrong hover:shadow-apple transition-all duration-200">
+                                  <!-- Tier 3: Milestone Card (Deliverable Checkpoint: Warm/Amber Header Tag, Distinct Border & Checkpoint Badge) -->
+                                  <div class="group/m relative bg-white border border-amber-200/80 rounded-2xl p-3.5 shadow-apple transition-all duration-200 hover:border-amber-300 hover:shadow-apple-hover ${mActionsDone === actions.length && actions.length > 0 ? 'celebrate-milestone-gold ring-1 ring-amber-300' : ''}">
                                     
                                     <!-- Milestone Header -->
                                     <div class="flex items-start justify-between gap-2">
                                       <div class="flex-1 min-w-0">
-                                        <div class="flex flex-wrap items-center gap-1.5 mb-1">
-                                          <span class="text-[9px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200/60 px-2 py-0.2 rounded-full">
-                                            Milestone
+                                        <div class="flex flex-wrap items-center gap-1.5 mb-1.5">
+                                          <span class="inline-flex items-center space-x-1 text-[9px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100/90 border border-amber-300/60 px-2 py-0.5 rounded-md">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>
+                                            <span>MILESTONE</span>
                                           </span>
-                                          <span class="text-[9px] px-2 py-0.2 rounded-full font-medium ${
-                                            m.priority === 'High' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
-                                            m.priority === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
-                                            'bg-gray-100 text-gray-600'
+                                          <span class="text-[9px] px-2 py-0.5 rounded-md font-semibold ${
+                                            m.priority === 'High' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                                            m.priority === 'Medium' ? 'bg-amber-50 text-amber-800 border border-amber-200' :
+                                            'bg-gray-100 text-gray-700 border border-gray-200'
                                           }">
                                             ${escapeHtml(m.priority)}
                                           </span>
                                           ${m.deadline ? `
-                                            <span class="text-[9px] px-2 py-0.2 rounded-full border flex items-center space-x-1 ${getDeadlineToBadge(m.deadline)}">
-                                              <svg class="w-2.5 h-2.5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            <span class="text-[9px] font-medium px-2 py-0.5 rounded-md border flex items-center space-x-1 ${getDeadlineToBadge(m.deadline)}">
+                                              <svg class="w-2.5 h-2.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                               <span>${formatDeadline(m.deadline)}</span>
                                             </span>
                                           ` : ''}
@@ -2370,37 +3341,37 @@
                                     </div>
 
                                     <!-- Milestone Action Progress Summary & Add Action Button -->
-                                    <div class="mt-2.5 pt-2 border-t border-apple-border/50 flex items-center justify-between">
+                                    <div class="mt-2.5 pt-2 border-t border-gray-100 flex items-center justify-between">
                                       <div class="flex items-center space-x-2 flex-1 mr-2">
-                                        <div class="w-full max-w-[70px] bg-gray-100 rounded-full h-1 overflow-hidden">
-                                          <div class="bg-emerald-500 h-1 rounded-full transition-all duration-300" style="width: ${mProgress}%"></div>
+                                        <div class="w-full max-w-[70px] bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                          <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: ${mProgress}%"></div>
                                         </div>
-                                        <span class="text-[10px] text-apple-secondary font-medium">${mActionsDone}/${actions.length}</span>
+                                        <span class="text-[10px] font-semibold text-emerald-700">${mActionsDone}/${actions.length} actions</span>
                                       </div>
 
-                                      <button onclick="openActionModal('${goal.id}', '${sg.id}', '${m.id}')" class="text-[10px] font-medium text-apple-blue hover:text-apple-blueHover flex items-center space-x-1 bg-blue-50/60 hover:bg-blue-50 px-2 py-0.5 rounded-full transition">
+                                      <button onclick="openActionModal('${goal.id}', '${sg.id}', '${m.id}')" class="text-[10px] font-semibold text-apple-blue hover:text-apple-blueHover flex items-center space-x-1 bg-blue-50/70 hover:bg-blue-100/70 px-2 py-0.5 rounded-full transition">
                                         <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                         <span>+ Action</span>
                                       </button>
                                     </div>
 
-                                    <!-- Tier 4: Tactical Action Items under this Milestone -->
+                                    <!-- Tier 4: Tactical Action Items under this Milestone (Apple Reminders Style) -->
                                     ${!m.collapsed ? `
-                                      <div class="mt-2.5 space-y-1.5 pl-1 border-l-2 border-gray-100 ml-1">
+                                      <div class="mt-2.5 space-y-1.5 bg-gray-50/70 rounded-xl p-1.5 border border-gray-200/60">
                                         ${actions.length === 0 ? `
-                                          <p class="text-[10px] text-apple-tertiary italic py-1">No actions assigned yet. Click "+ Action" above.</p>
+                                          <p class="text-[10px] text-apple-tertiary italic py-1 px-1.5">No actions assigned yet. Click "+ Action" above.</p>
                                         ` : actions.map(act => `
-                                          <div class="group/act flex items-center justify-between p-1.5 rounded-xl hover:bg-apple-subtle transition">
+                                          <div class="group/act flex items-center justify-between p-1.5 rounded-lg bg-white border border-apple-border/70 hover:border-apple-blue/40 transition shadow-2xs">
                                             <div class="flex items-center space-x-2 flex-1 min-w-0 mr-2">
-                                              <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleAction('${goal.id}', '${sg.id}', '${m.id}', '${act.id}')" class="apple-checkbox" aria-label="Mark action done">
+                                              <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleAction('${goal.id}', '${sg.id}', '${m.id}', '${act.id}', event)" class="apple-checkbox" aria-label="Mark action done">
                                               
                                               <div class="flex-1 min-w-0">
                                                 <p class="text-xs font-medium truncate ${act.completed ? 'line-through text-apple-tertiary' : 'text-apple-dark'}">
                                                   ${escapeHtml(act.title)}
                                                 </p>
                                                 ${act.cadence ? `
-                                                  <span class="text-[9px] text-apple-secondary">
-                                                    ${escapeHtml(act.cadence)}
+                                                  <span class="text-[9px] text-apple-secondary font-medium">
+                                                    ⏱ ${escapeHtml(act.cadence)}
                                                   </span>
                                                 ` : ''}
                                               </div>
