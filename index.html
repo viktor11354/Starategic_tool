@@ -410,10 +410,15 @@
         <div class="lg:col-span-8 bg-white rounded-3xl border border-apple-border shadow-apple p-5 sm:p-6">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-apple-border/60">
             <div class="flex items-center space-x-2">
-            <!-- Timeline Rows Container -->
-            <div id="planner-timeline-grid" class="divide-y divide-apple-border/50">
-              <!-- Dynamically populated via renderPlannerTimeline() -->
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+              <h3 class="text-sm font-semibold text-apple-dark">Hourly Timeline</h3>
             </div>
+            <span class="text-xs text-apple-secondary font-medium">06:00 – 22:00</span>
+          </div>
+
+          <!-- Timeline Rows Container -->
+          <div id="planner-timeline-grid" class="divide-y divide-apple-border/50">
+            <!-- Dynamically populated via renderPlanner() -->
           </div>
 
           <!-- AI Daily Focus Recommendations Widget (DailyFocusWidget) -->
@@ -584,7 +589,7 @@
   </div>
 
   <!-- MODAL 3B: Tactical Action (Add / Edit under a Milestone) -->
-  <div id="action-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
+  <div id="action-modal" onclick="if(event.target === this) closeActionModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm hidden">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-apple-modal border border-apple-border transition-all transform scale-100">
       <div class="flex items-center justify-between mb-4">
         <div>
@@ -1977,6 +1982,62 @@
       document.getElementById('action-modal').classList.remove('hidden');
       setTimeout(() => document.getElementById('action-title-input').focus(), 50);
     }
+
+    function closeActionModal() {
+      const modal = document.getElementById('action-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleSaveAction(e) {
+      e.preventDefault();
+      const goalId = document.getElementById('action-goal-id').value;
+      const subGoalId = document.getElementById('action-subgoal-id').value;
+      const milestoneId = document.getElementById('action-milestone-id').value;
+      const editActionId = document.getElementById('action-edit-id').value;
+      const title = document.getElementById('action-title-input').value.trim();
+      const cadence = document.getElementById('action-cadence-input').value.trim();
+      const scheduledDate = document.getElementById('action-date-input').value;
+
+      if (!title) return;
+
+      const goal = goals.find(g => g.id === goalId);
+      if (goal && goal.subGoals) {
+        const sg = goal.subGoals.find(s => s.id === subGoalId);
+        if (sg && sg.milestones) {
+          const m = sg.milestones.find(item => item.id === milestoneId);
+          if (m) {
+            if (!m.actions) m.actions = [];
+
+            if (editActionId) {
+              const act = m.actions.find(a => a.id === editActionId);
+              if (act) {
+                act.title = title;
+                act.cadence = cadence || act.cadence || '1h focus';
+                act.scheduledDate = scheduledDate || null;
+                showToast('Action updated');
+              }
+            } else {
+              m.actions.push({
+                id: 'act-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+                title,
+                cadence: cadence || '1h focus',
+                scheduledDate: scheduledDate || m.deadline || null,
+                scheduledSlot: null,
+                durationMinutes: 60,
+                completed: false
+              });
+              m.collapsed = false;
+              showToast('Tactical action committed');
+            }
+
+            saveState();
+            render();
+            closeActionModal();
+          }
+        }
+      }
+    }
+
     // Toggle Action Complete with Gamification Triggers
     function toggleAction(goalId, subGoalId, milestoneId, actionId, event = null) {
       const goal = goals.find(g => g.id === goalId);
